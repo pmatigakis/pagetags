@@ -30,7 +30,7 @@ class Domain(db.Model):
     __tablename__ = "domains"
 
     __table_args__ = (
-        db.PrimaryKeyConstraint("id", name="pk_tags"),
+        db.PrimaryKeyConstraint("id", name="pk_domains"),
         db.UniqueConstraint("name", name="uq_domains__name")
     )
 
@@ -42,11 +42,11 @@ class Url(db.Model):
     __tablename__ = "urls"
 
     __table_args__ = (
-        db.PrimaryKeyConstraint("id", name="pk_tags"),
+        db.PrimaryKeyConstraint("id", name="pk_urls"),
         db.ForeignKeyConstraint(["domain_id"],
                                 ["domains.id"],
                                 name="fk_urls__domain_id__domains"),
-        db.UniqueConstraint("name", name="uq_urls__url")
+        db.UniqueConstraint("url", name="uq_urls__url")
     )
 
     id = db.Column(db.Integer, nullable=False)

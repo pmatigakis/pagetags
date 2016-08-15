@@ -2,3 +2,4 @@
 .idea
 Pagetags.egg-info
 temp
+*.db

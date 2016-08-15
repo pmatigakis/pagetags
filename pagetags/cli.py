@@ -1,3 +1,5 @@
+import os
+
 from flask_script import Command
 from flask_script import Manager
 
@@ -13,7 +15,10 @@ class InitDB(Command):
 
 
 def main():
-    app = create_app()
+    settings_path = os.path.join(os.getcwd(), "settings.py")
+    environment_type = os.getenv("PAGETAGS_ENV", "production")
+
+    app = create_app(settings_path, environment_type)
 
     manager = Manager(app)
     manager.add_command("initdb", InitDB())
