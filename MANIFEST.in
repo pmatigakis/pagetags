@@ -1,0 +1,2 @@
+recursive-include pagetags/templates *
+recursive-include pagetags/static *
