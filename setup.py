@@ -16,4 +16,9 @@ setup(
     setup_requires=["nose==1.3.7"],
     tests_require=["nose==1.3.7"],
     test_suite = 'nose.collector',
+    entry_points={
+        'console_scripts': [
+            'pagetags = pagetags.cli:main',
+        ]
+    }
 )
