@@ -2,9 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>PageTags</title>
 </head>
 <body>
+    <h1>Urls</h1>
 
+    <div>
+        <a href="{{ url_for('new_url') }}">New URL</a>
+    </div>
+
+    <div>
+        {% for url in latest_urls %}
+            <div>
+                <div><a href="{{ url.url }}">{{ url.url }}</a></div>
+                <div>
+                    {% for tag in url.tags %}
+                        {{ tag.name }}
+                    {% endfor %}
+                </div>
+                <div>{{ url.added_at }}</div>
+            </div>
+        {% endfor %}
+    </div>
 </body>
 </html>
