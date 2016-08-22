@@ -89,6 +89,11 @@ class Tag(db.Model):
 
         return tag
 
+    def get_urls_by_page(self, page, per_page=10):
+        return Url.query.filter(Url.tags.contains(self))\
+                        .order_by(db.desc(Url.added_at))\
+                        .paginate(page=page, per_page=per_page)
+
 
 class Url(db.Model):
     __tablename__ = "urls"

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tag - {{ tag.name }}</title>
+</head>
+<a>
+
+    <h1>{{ tag.name }}</h1>
+
+    {% for url in paginator.items %}
+        <div><a href="{{ url.url }}">{{ url.url }}</a></div>
+    {% endfor %}
+
+    <div>
+        {% if paginator.has_prev %}
+        <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.prev_num }}">prev</a>
+        {% endif %}
+
+        {% if paginator.has_next %}
+        <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.next_num }}">next</a>
+        {% endif %}
+    </div>
+
+</body>
+</html>

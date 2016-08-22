@@ -1,7 +1,7 @@
 from flask import Flask
 
 from pagetags.models import db
-from pagetags.views import index, new_url
+from pagetags.views import index, new_url, tag
 
 
 def create_app(settings_file, environment_type=None):
@@ -33,5 +33,6 @@ def create_app(settings_file, environment_type=None):
 
     app.add_url_rule("/", view_func=index)
     app.add_url_rule("/new_url", view_func=new_url, methods=["GET", "POST"])
+    app.add_url_rule("/tag/<name>", view_func=tag)
 
     return app

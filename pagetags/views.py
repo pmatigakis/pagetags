@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, request
 
 from pagetags import forms, models, db
 
@@ -37,3 +37,14 @@ def new_url():
         return redirect(url_for("index"))
 
     return render_template("new_url.html", form=form)
+
+
+def tag(name):
+    page = request.args.get("page", 1)
+    page = int(page)
+
+    tag_object = models.Tag.get_by_name(name)
+
+    paginator = tag_object.get_urls_by_page(page)
+
+    return render_template("tag.html", tag=tag_object, paginator=paginator)
