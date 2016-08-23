@@ -1,14 +1,17 @@
 from flask import render_template, redirect, url_for, request
+from flask_login import login_required, login_user, logout_user
 
 from pagetags import forms, models, db
 
 
+@login_required
 def index():
     latest_urls = models.Url.get_latest()
 
     return render_template("index.html", latest_urls=latest_urls)
 
 
+@login_required
 def new_url():
     form = forms.Url()
 
@@ -40,6 +43,7 @@ def new_url():
     return render_template("new_url.html", form=form)
 
 
+@login_required
 def tag(name):
     page = request.args.get("page", 1)
     page = int(page)
@@ -49,3 +53,27 @@ def tag(name):
     paginator = tag_object.get_urls_by_page(page)
 
     return render_template("tag.html", tag=tag_object, paginator=paginator)
+
+
+def login():
+    form = forms.Login()
+
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+
+        user = models.User.authenticate(username, password)
+
+        if user:
+            login_user(user)
+
+            return redirect(url_for("index"))
+
+    return render_template("login.html", form=form)
+
+
+@login_required
+def logout():
+    logout_user()
+
+    return redirect(url_for("login"))

@@ -1,7 +1,9 @@
 from flask import Flask
 
+from pagetags import login_manager
 from pagetags.models import db
-from pagetags.views import index, new_url, tag
+from pagetags.views import index, new_url, tag, login, logout
+from pagetags.authentication import load_user
 
 
 def create_app(settings_file, environment_type=None):
@@ -30,9 +32,13 @@ def create_app(settings_file, environment_type=None):
     app.config.from_pyfile(settings_file, silent=False)
 
     db.init_app(app)
+    login_manager.init_app(app)
+    login_manager.user_callback = load_user
 
     app.add_url_rule("/", view_func=index)
     app.add_url_rule("/new_url", view_func=new_url, methods=["GET", "POST"])
     app.add_url_rule("/tag/<name>", view_func=tag)
+    app.add_url_rule("/login", view_func=login, methods=["GET", "POST"])
+    app.add_url_rule("/logout", view_func=logout)
 
     return app

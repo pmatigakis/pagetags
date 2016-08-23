@@ -7,3 +7,8 @@ class Url(Form):
     title = StringField("title", validators=[DataRequired()])
     url = StringField("url", validators=[DataRequired(), URL()])
     tags = StringField("tags", validators=[DataRequired()])
+
+
+class Login(Form):
+    username = StringField("username", validators=[DataRequired()])
+    password = StringField("password", validators=[DataRequired()])

@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
 from pagetags import db
 
@@ -14,7 +15,7 @@ url_tags = db.Table(
 )
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = "users"
 
     __table_args__ = (
@@ -51,6 +52,17 @@ class User(db.Model):
 
     def change_password(self, password):
         self.password = generate_password_hash(password)
+
+    @classmethod
+    def authenticate(cls, username, password):
+        user = db.session.query(User)\
+                         .filter_by(username=username)\
+                         .one_or_none()
+
+        if user and check_password_hash(user.password, password):
+            return user
+
+        return None
 
 
 class Tag(db.Model):
