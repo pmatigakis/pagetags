@@ -14,6 +14,7 @@
     <div>
         {% for url in latest_urls %}
             <div>
+                <div><a href="{{ url.url }}">{{ url.title }}</a></div>
                 <div><a href="{{ url.url }}">{{ url.url }}</a></div>
                 <div>
                     {% for tag in url.tags %}

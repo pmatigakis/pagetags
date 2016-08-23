@@ -104,14 +104,18 @@ class Url(db.Model):
     )
 
     id = db.Column(db.Integer, nullable=False)
+    title = db.Column(db.String(256), nullable=False)
     url = db.Column(db.String(1024), nullable=False)
     added_at = db.Column(db.DateTime, nullable=False)
 
     tags = db.relationship('Tag', secondary=url_tags, back_populates="urls")
 
     @classmethod
-    def create(cls, url, tags):
-        url_object = cls(url=url, tags=tags, added_at=datetime.utcnow())
+    def create(cls, title, url, tags):
+        url_object = cls(title=title,
+                         url=url,
+                         tags=tags,
+                         added_at=datetime.utcnow())
 
         db.session.add(url_object)
 

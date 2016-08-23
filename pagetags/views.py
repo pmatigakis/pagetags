@@ -13,6 +13,7 @@ def new_url():
     form = forms.Url()
 
     if form.validate_on_submit():
+        title = form.title.data
         url = form.url.data.lower()
         tags = form.tags.data.lower().split(" ")
 
@@ -28,7 +29,7 @@ def new_url():
         url_object = models.Url.get_by_url(url)
 
         if url_object is None:
-            models.Url.create(url, tag_objects)
+            models.Url.create(title, url, tag_objects)
         else:
             url_object.tags = tag_objects
 
