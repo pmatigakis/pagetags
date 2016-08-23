@@ -9,7 +9,9 @@ setup(
         "Flask-Script==2.0.5",
         "Flask-SQLAlchemy==2.1",
         "Flask-WTF==0.12",
-        "Flask-Login==0.3.2"
+        "Flask-Login==0.3.2",
+        "Flask-JWT==0.3.2",
+        "Flask-RESTful==0.3.5"
     ],
     include_package_data=True,
     zip_safe=False,

@@ -34,6 +34,10 @@ def new_url():
         if url_object is None:
             models.Url.create(title, url, tag_objects)
         else:
+            url_object.tags = []
+
+            db.session.commit()
+
             url_object.tags = tag_objects
 
         db.session.commit()

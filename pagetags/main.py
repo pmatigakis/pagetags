@@ -1,9 +1,11 @@
 from flask import Flask
+from flask_restful import Api
 
 from pagetags import login_manager
 from pagetags.models import db
 from pagetags.views import index, new_url, tag, login, logout
 from pagetags.authentication import load_user
+from pagetags.api import TagsResource, TagUrlsResource
 
 
 def create_app(settings_file, environment_type=None):
@@ -40,5 +42,10 @@ def create_app(settings_file, environment_type=None):
     app.add_url_rule("/tag/<name>", view_func=tag)
     app.add_url_rule("/login", view_func=login, methods=["GET", "POST"])
     app.add_url_rule("/logout", view_func=logout)
+
+    api = Api(app)
+
+    api.add_resource(TagsResource, "/api/v1/tags")
+    api.add_resource(TagUrlsResource, "/api/v1/tag/<tag>")
 
     return app
