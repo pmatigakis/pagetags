@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tag - {{ tag.name }}</title>
+    <title>PageTags - Tag - {{ tag.name }}</title>
 </head>
 <a>
 
     <h1>{{ tag.name }}</h1>
 
     {% for url in paginator.items %}
-        <div><a href="{{ url.url }}">{{ url.url }}</a></div>
+        <div><a href="{{ url.url }}">{{ url.title }}</a></div>
     {% endfor %}
 
     <div>

@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, request
+from flask import render_template, redirect, url_for, request, abort
 from flask_login import login_required, login_user, logout_user
 
 from pagetags import forms, models, db
@@ -53,6 +53,9 @@ def tag(name):
     page = int(page)
 
     tag_object = models.Tag.get_by_name(name)
+
+    if tag_object is None:
+        abort(404)
 
     paginator = tag_object.get_urls_by_page(page)
 
