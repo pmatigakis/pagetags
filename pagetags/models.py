@@ -127,9 +127,21 @@ class Url(db.Model):
 
     @classmethod
     def create(cls, title, url, tags):
+        tag_objects = db.session.query(Tag).filter(Tag.name.in_(tags)).all()
+
+        existing_tags = set([tag.name for tag in tag_objects])
+
+        missing_tags = set(tags).difference(existing_tags)
+
+        for tag in missing_tags:
+            tag = Tag.create(tag)
+            tag_objects.append(tag)
+
+        db.session.commit()
+
         url_object = cls(title=title,
                          url=url,
-                         tags=tags,
+                         tags=tag_objects,
                          added_at=datetime.utcnow())
 
         db.session.add(url_object)

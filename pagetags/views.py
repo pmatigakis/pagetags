@@ -20,23 +20,23 @@ def new_url():
         url = form.url.data.lower()
         tags = form.tags.data.lower().split(" ")
 
-        tag_objects = []
-
-        for tag in tags:
-            tag = models.Tag.get_or_create(tag)
-
-            db.session.commit()
-
-            tag_objects.append(tag)
-
         url_object = models.Url.get_by_url(url)
 
         if url_object is None:
-            models.Url.create(title, url, tag_objects)
+            models.Url.create(title, url, tags)
         else:
             url_object.tags = []
 
             db.session.commit()
+
+            tag_objects = []
+
+            for tag in tags:
+                tag = models.Tag.get_or_create(tag)
+
+                db.session.commit()
+
+                tag_objects.append(tag)
 
             url_object.tags = tag_objects
 
