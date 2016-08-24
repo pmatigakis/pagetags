@@ -4,8 +4,9 @@ from flask_restful import Api
 from pagetags import login_manager
 from pagetags.models import db
 from pagetags.views import index, new_url, tag, login, logout
-from pagetags.authentication import load_user
+from pagetags.authentication import load_user, authenticate, identity
 from pagetags.api import TagsResource, TagUrlsResource
+from pagetags import jwt
 
 
 def create_app(settings_file, environment_type=None):
@@ -47,5 +48,9 @@ def create_app(settings_file, environment_type=None):
 
     api.add_resource(TagsResource, "/api/v1/tags")
     api.add_resource(TagUrlsResource, "/api/v1/tag/<tag>")
+
+    jwt.authentication_callback = authenticate
+    jwt.identity_callback = identity
+    jwt.init_app(app)
 
     return app

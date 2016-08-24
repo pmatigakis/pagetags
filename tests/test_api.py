@@ -44,6 +44,23 @@ class ApiTestCase(TestCase):
 
         db.session.commit()
 
+    def authenticate(self):
+        request_data = {
+            "username": self.USERNAME,
+            "password": self.PASSWORD
+        }
+
+        response = self.client.post(
+            "/auth",
+            data=json.dumps(request_data),
+            headers={"Content-Type": "application/json"},
+            follow_redirects=True
+        )
+
+        response = json.loads(response.data)
+
+        return response["access_token"]
+
 
 class TagsTest(ApiTestCase):
     def test_get_tags(self):
@@ -56,13 +73,18 @@ class TagsTest(ApiTestCase):
                          "http://www.example.com/page_2",
                          ["tag1", "tag3"])
 
-        response = self.client.get("/api/v1/tags")
+        token = self.authenticate()
+
+        response = self.client.get(
+            "/api/v1/tags",
+            headers={"Authorization": "JWT %s" % token}
+        )
 
         response = json.loads(response.data)
 
         self.assertItemsEqual(response, ["tag1", "tag2", "tag3"])
 
-    def test_get_tag_urlss(self):
+    def test_get_tag_urls(self):
         with self.app.app_context():
             self.add_url("page 1",
                          "http://www.example.com/page_1",
@@ -72,7 +94,12 @@ class TagsTest(ApiTestCase):
                          "http://www.example.com/page_2",
                          ["tag1", "tag3"])
 
-        response = self.client.get("/api/v1/tag/tag1")
+        token = self.authenticate()
+
+        response = self.client.get(
+            "/api/v1/tag/tag1",
+            headers={"Authorization": "JWT %s" % token}
+        )
 
         response = json.loads(response.data)
 
@@ -96,7 +123,10 @@ class TagsTest(ApiTestCase):
             }
         )
 
-        response = self.client.get("/api/v1/tag/tag3")
+        response = self.client.get(
+            "/api/v1/tag/tag3",
+            headers={"Authorization": "JWT %s" % token}
+        )
 
         response = json.loads(response.data)
 
@@ -110,6 +140,43 @@ class TagsTest(ApiTestCase):
                 "url": "http://www.example.com/page_2"
             }
         )
+
+
+class FailtToAccessApPIEndpointWithouTokenTests(ApiTestCase):
+    def test_fail_to_access_tags_endpoint_without_token(self):
+        response = self.client.get("/api/v1/tag/tag1")
+
+        response = json.loads(response.data)
+
+        self.assertDictEqual(
+            response,
+            {
+                "description": "Request does not contain an access token",
+                "error": "Authorization Required",
+                "status_code": 401
+            }
+        )
+
+
+class ApiAuthenticationTests(ApiTestCase):
+    def test_authenticate(self):
+        request_data = {
+            "username": self.USERNAME,
+            "password": self.PASSWORD
+        }
+
+        response = self.client.post(
+            "/auth",
+            data=json.dumps(request_data),
+            headers={"Content-Type": "application/json"},
+            follow_redirects=True
+        )
+
+        response = json.loads(response.data)
+
+        self.assertIn("access_token", response)
+        self.assertIsNotNone(response["access_token"])
+        self.assertIsInstance(response["access_token"], unicode)
 
 
 if __name__ == "__main__":
