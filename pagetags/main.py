@@ -1,3 +1,6 @@
+import logging
+from logging.handlers import RotatingFileHandler
+
 from flask import Flask
 from flask_restful import Api
 
@@ -7,6 +10,25 @@ from pagetags.views import index, new_url, tag, login, logout
 from pagetags.authentication import load_user, authenticate, identity
 from pagetags.api import TagsResource, TagUrlsResource
 from pagetags import jwt
+
+
+def initialize_logging(app):
+    log_file = app.config["LOG_FILE"]
+    log_file_size = app.config["LOG_FILE_SIZE"]
+    log_file_count = app.config["LOG_FILE_COUNT"]
+    log_level = app.config["LOG_LEVEL"]
+
+    handler = RotatingFileHandler(log_file,
+                                  maxBytes=log_file_size,
+                                  backupCount=log_file_count)
+
+    app.logger.addHandler(handler)
+    if app.config["DEBUG"]:
+        handler.setLevel(logging.DEBUG)
+        app.logger.setLevel(logging.DEBUG)
+    else:
+        handler.setLevel(log_level)
+        app.logger.setLevel(log_level)
 
 
 def create_app(settings_file, environment_type=None):
@@ -33,6 +55,9 @@ def create_app(settings_file, environment_type=None):
     app.config.from_object(environment_configurations[environment_type])
 
     app.config.from_pyfile(settings_file, silent=False)
+
+    if app.config["ENABLE_LOGGING"]:
+        initialize_logging(app)
 
     db.init_app(app)
     login_manager.init_app(app)

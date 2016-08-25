@@ -1,1 +1,11 @@
+import logging
+
+
 PROPAGATE_EXCEPTIONS = True
+
+ENABLE_LOGGING = True
+
+LOG_FILE = "pagetags.log"
+LOG_LEVEL = logging.INFO
+LOG_FILE_SIZE = 10000000
+LOG_FILE_COUNT = 5
