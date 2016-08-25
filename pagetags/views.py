@@ -1,4 +1,5 @@
-from flask import render_template, redirect, url_for, request, abort
+from flask import (render_template, redirect, url_for, request, abort,
+                   current_app)
 from flask_login import login_required, login_user, logout_user
 
 from pagetags import forms, models, db
@@ -19,6 +20,9 @@ def new_url():
         title = form.title.data
         url = form.url.data.lower()
         tags = form.tags.data.lower().split(" ")
+
+        msg = "adding url {} - {} - {}"
+        current_app.logger.info(msg.format(title, url, ','.join(tags)))
 
         url_object = models.Url.get_by_url(url)
 
@@ -52,9 +56,13 @@ def tag(name):
     page = request.args.get("page", 1)
     page = int(page)
 
+    msg = "requested page for tag '{}': {}"
+    current_app.logger.info(msg.format(name, page))
+
     tag_object = models.Tag.get_by_name(name)
 
     if tag_object is None:
+        current_app.logger.info("tag '{}' doesn't exist".format(name))
         abort(404)
 
     paginator = tag_object.get_urls_by_page(page)
@@ -69,12 +77,19 @@ def login():
         username = form.username.data
         password = form.password.data
 
+        current_app.logger.info("authenticating user {}".format(username))
+
         user = models.User.authenticate(username, password)
 
         if user:
+            current_app.logger.info("user {} authenticated".format(username))
             login_user(user)
 
             return redirect(url_for("index"))
+        else:
+            msg = "user {} failed to authenticate"
+            current_app.logger.warning(msg.format(username))
+            abort(401)
 
     return render_template("login.html", form=form)
 

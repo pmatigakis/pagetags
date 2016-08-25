@@ -3,3 +3,4 @@
 Pagetags.egg-info
 temp
 *.db
+*.log
