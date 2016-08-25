@@ -1,6 +1,6 @@
 from flask import (render_template, redirect, url_for, request, abort,
                    current_app)
-from flask_login import login_required, login_user, logout_user
+from flask_login import login_required, login_user, logout_user, current_user
 
 from pagetags import forms, models, db
 
@@ -44,7 +44,10 @@ def new_url():
 
             url_object.tags = tag_objects
 
-        db.session.commit()
+        try:
+            db.session.commit()
+        except db.SQLAlchemyError:
+            current_app.exception("failed to save utl {}".format(url))
 
         return redirect(url_for("index"))
 
@@ -96,6 +99,9 @@ def login():
 
 @login_required
 def logout():
+    msg = "logging out user {}"
+    current_app.logger.info(msg.format(current_user.username))
+
     logout_user()
 
     return redirect(url_for("login"))
