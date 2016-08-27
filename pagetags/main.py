@@ -20,7 +20,8 @@ def initialize_logging(app):
 
     handler = RotatingFileHandler(log_file,
                                   maxBytes=log_file_size,
-                                  backupCount=log_file_count)
+                                  backupCount=log_file_count,
+                                  encoding="utf8")
 
     app.logger.addHandler(handler)
     if app.config["DEBUG"]:
