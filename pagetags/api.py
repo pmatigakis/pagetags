@@ -1,7 +1,8 @@
-from flask_restful import Resource
+from flask_restful import Resource, abort
 from flask_jwt import jwt_required
+from sqlalchemy.exc import SQLAlchemyError
 
-from pagetags import models, db
+from pagetags import models, db, reqparsers
 
 
 class TagsResource(Resource):
@@ -27,3 +28,20 @@ class TagPostingsResource(Resource):
             }
             for posting in postings
         ]
+
+
+class PostingsResource(Resource):
+    @jwt_required()
+    def post(self):
+        args = reqparsers.posting.parse_args()
+
+        posting = models.Posting.create(args.title, args.url, args.tags)
+
+        try:
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()
+
+            abort(500)
+
+        return {"id": posting.id}

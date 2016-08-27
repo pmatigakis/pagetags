@@ -184,5 +184,29 @@ class ApiAuthenticationTests(ApiTestCase):
         self.assertIsInstance(response["access_token"], unicode)
 
 
+class PostingApiTests(ApiTestCase):
+    def test_add_posting(self):
+        token = self.authenticate()
+
+        posting = {
+            "title": "posting title",
+            "url": "http://www.example.com",
+            "tags": ["tag1", "tag2"]
+        }
+
+        response = self.client.post(
+            "/api/v1/postings",
+            headers={"Authorization": "JWT %s" % token,
+                     "Content-Type": "application/json"},
+            data=json.dumps(posting)
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        response = json.loads(response.data)
+
+        self.assertIsNotNone(response.get("id"))
+
+
 if __name__ == "__main__":
     main()
