@@ -22,7 +22,7 @@ def new_url():
         url = form.url.data.lower()
         tags = form.tags.data.lower().split(" ")
 
-        msg = "adding url {} - {} - {}"
+        msg = u"adding url {} - {} - {}"
         current_app.logger.info(msg.format(title, url, ','.join(tags)))
 
         posting = models.Posting.create(title, url, tags)
@@ -32,7 +32,7 @@ def new_url():
         except SQLAlchemyError:
             db.session.rollback()
 
-            current_app.logger.exception("failed to save url {}".format(url))
+            current_app.logger.exception(u"failed to save url {}".format(url))
 
         current_app.logger.debug("Added posting with id %d", posting.id)
 
@@ -46,13 +46,13 @@ def tag(name):
     page = request.args.get("page", 1)
     page = int(page)
 
-    msg = "requested page for tag '{}': {}"
+    msg = u"requested page for tag '{}': {}"
     current_app.logger.info(msg.format(name, page))
 
     tag_object = models.Tag.get_by_name(name)
 
     if tag_object is None:
-        current_app.logger.info("tag '{}' doesn't exist".format(name))
+        current_app.logger.info(u"tag '{}' doesn't exist".format(name))
         abort(404)
 
     paginator = tag_object.get_postings_by_page(page)
@@ -67,17 +67,17 @@ def login():
         username = form.username.data
         password = form.password.data
 
-        current_app.logger.info("authenticating user {}".format(username))
+        current_app.logger.info(u"authenticating user {}".format(username))
 
         user = models.User.authenticate(username, password)
 
         if user:
-            current_app.logger.info("user {} authenticated".format(username))
+            current_app.logger.info(u"user {} authenticated".format(username))
             login_user(user)
 
             return redirect(url_for("index"))
         else:
-            msg = "user {} failed to authenticate"
+            msg = u"user {} failed to authenticate"
             current_app.logger.warning(msg.format(username))
             abort(401)
 
@@ -86,7 +86,7 @@ def login():
 
 @login_required
 def logout():
-    msg = "logging out user {}"
+    msg = u"logging out user {}"
     current_app.logger.info(msg.format(current_user.username))
 
     logout_user()
