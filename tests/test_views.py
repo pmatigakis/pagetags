@@ -31,6 +31,11 @@ class LoginTests(TestCase):
             db.session.commit()
 
     def tearDown(self):
+        with self.app.app_context():
+            db.session.remove()
+            db.drop_all()
+            db.get_engine(self.app).dispose()
+
         try:
             os.remove(self.db_path)
         except:
@@ -108,6 +113,11 @@ class WebTestCase(TestCase):
         self.client = self.app.test_client()
 
     def tearDown(self):
+        with self.app.app_context():
+            db.session.remove()
+            db.drop_all()
+            db.get_engine(self.app).dispose()
+
         try:
             os.remove(self.db_path)
         except:
@@ -208,7 +218,7 @@ class NewUrlViewTests(WebTestCase):
         self.assertIn("test url</a>", response.data)
         self.assertIn("http://www.example.com</a>", response.data)
         self.assertIn("tag1", response.data)
-        self.assertNotIn("tag2", response.data)
+        self.assertIn("tag2", response.data)
         self.assertIn("tag3", response.data)
 
         self.logout()

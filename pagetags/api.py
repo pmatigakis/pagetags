@@ -12,18 +12,18 @@ class TagsResource(Resource):
         return [tag.name for tag in tags]
 
 
-class TagUrlsResource(Resource):
+class TagPostingsResource(Resource):
     @jwt_required()
     def get(self, tag):
         tag = models.Tag.get_by_name(tag)
 
-        urls = tag.get_urls()
+        postings = tag.get_postings()
 
         return [
             {
-                "id": url.id,
-                "title": url.title,
-                "url": url.url
+                "id": posting.id,
+                "title": posting.title,
+                "url": posting.url.url
             }
-            for url in urls
+            for posting in postings
         ]

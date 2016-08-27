@@ -4,7 +4,7 @@ import json
 
 from pagetags.main import create_app
 from pagetags import db
-from pagetags.models import User, Url
+from pagetags.models import User, Posting
 
 
 class ApiTestCase(TestCase):
@@ -34,13 +34,18 @@ class ApiTestCase(TestCase):
         self.client = self.app.test_client()
 
     def tearDown(self):
+        with self.app.app_context():
+            db.session.remove()
+            db.drop_all()
+            db.get_engine(self.app).dispose()
+
         try:
             os.remove(self.db_path)
         except:
             pass
 
-    def add_url(self, title, url, tags):
-        Url.create(title, url, tags)
+    def add_posting(self, title, url, tags):
+        Posting.create(title, url, tags)
 
         db.session.commit()
 
@@ -65,13 +70,13 @@ class ApiTestCase(TestCase):
 class TagsTest(ApiTestCase):
     def test_get_tags(self):
         with self.app.app_context():
-            self.add_url("page 1",
-                         "http://www.example.com/page_1",
-                         ["tag1", "tag2"])
+            self.add_posting("page 1",
+                             "http://www.example.com/page_1",
+                             ["tag1", "tag2"])
 
-            self.add_url("page 2",
-                         "http://www.example.com/page_2",
-                         ["tag1", "tag3"])
+            self.add_posting("page 2",
+                             "http://www.example.com/page_2",
+                             ["tag1", "tag3"])
 
         token = self.authenticate()
 
@@ -86,13 +91,13 @@ class TagsTest(ApiTestCase):
 
     def test_get_tag_urls(self):
         with self.app.app_context():
-            self.add_url("page 1",
-                         "http://www.example.com/page_1",
-                         ["tag1", "tag2"])
+            self.add_posting("page 1",
+                             "http://www.example.com/page_1",
+                             ["tag1", "tag2"])
 
-            self.add_url("page 2",
-                         "http://www.example.com/page_2",
-                         ["tag1", "tag3"])
+            self.add_posting("page 2",
+                             "http://www.example.com/page_2",
+                             ["tag1", "tag3"])
 
         token = self.authenticate()
 

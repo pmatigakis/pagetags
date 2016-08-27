@@ -6,11 +6,12 @@ from flask_login import UserMixin
 from pagetags import db
 
 
-url_tags = db.Table(
-    "url_tags",
-    db.Column("url_id", db.Integer, nullable=False),
+posting_tags = db.Table(
+    "posting_tags",
+    db.Column("posting_id", db.Integer, nullable=False),
     db.Column("tag_id", db.Integer, nullable=False),
-    db.ForeignKeyConstraint(["url_id"], ["urls.id"], name="fk_url_id__urls"),
+    db.ForeignKeyConstraint(
+        ["posting_id"], ["postings.id"], name="fk_posting_id__postings"),
     db.ForeignKeyConstraint(["tag_id"], ["tags.id"], name="fk_tag_id__tags"),
 )
 
@@ -76,7 +77,8 @@ class Tag(db.Model):
     id = db.Column(db.Integer, nullable=False)
     name = db.Column(db.String(100), nullable=False)
 
-    urls = db.relationship('Url', secondary=url_tags, back_populates="tags")
+    postings = db.relationship(
+        'Posting', secondary=posting_tags, back_populates="tags")
 
     @classmethod
     def get_by_name(cls, name):
@@ -97,17 +99,18 @@ class Tag(db.Model):
         if tag is None:
             tag = cls.create(name)
 
-            db.session.add(tag)
-
         return tag
 
-    def get_urls_by_page(self, page, per_page=10):
-        return Url.query.filter(Url.tags.contains(self))\
-                        .order_by(db.desc(Url.added_at))\
-                        .paginate(page=page, per_page=per_page)
+    def get_postings_by_page(self, page, per_page=10):
+        return Posting.query\
+                      .filter(Posting.tags.contains(self))\
+                      .order_by(db.desc(Posting.added_at))\
+                      .paginate(page=page, per_page=per_page)
 
-    def get_urls(self):
-        return db.session.query(Url).filter(Url.tags.contains(self)).all()
+    def get_postings(self):
+        return db.session.query(Posting)\
+                         .filter(Posting.tags.contains(self))\
+                         .all()
 
 
 class Url(db.Model):
@@ -119,30 +122,14 @@ class Url(db.Model):
     )
 
     id = db.Column(db.Integer, nullable=False)
-    title = db.Column(db.String(256), nullable=False)
     url = db.Column(db.String(1024), nullable=False)
     added_at = db.Column(db.DateTime, nullable=False)
 
-    tags = db.relationship('Tag', secondary=url_tags, back_populates="urls")
+    postings = db.relationship("Posting", back_populates="url")
 
     @classmethod
-    def create(cls, title, url, tags):
-        tag_objects = db.session.query(Tag).filter(Tag.name.in_(tags)).all()
-
-        existing_tags = set([tag.name for tag in tag_objects])
-
-        missing_tags = set(tags).difference(existing_tags)
-
-        for tag in missing_tags:
-            tag = Tag.create(tag)
-            tag_objects.append(tag)
-
-        db.session.commit()
-
-        url_object = cls(title=title,
-                         url=url,
-                         tags=tag_objects,
-                         added_at=datetime.utcnow())
+    def create(cls, url):
+        url_object = cls(url=url, added_at=datetime.utcnow())
 
         db.session.add(url_object)
 
@@ -151,6 +138,57 @@ class Url(db.Model):
     @classmethod
     def get_by_url(cls, url):
         return db.session.query(cls).filter_by(url=url).one_or_none()
+
+    @classmethod
+    def get_latest(cls, count=20):
+        return db.session.query(cls)\
+                         .order_by(db.desc(cls.added_at))\
+                         .limit(count)
+
+    @classmethod
+    def get_or_create(cls, url):
+        url_object = cls.get_by_url(url)
+
+        if url_object is None:
+            url_object = cls.create(url)
+
+        return url_object
+
+
+class Posting(db.Model):
+    __tablename__ = "postings"
+
+    __table_args__ = (
+        db.PrimaryKeyConstraint("id", name="pk_postings"),
+        db.ForeignKeyConstraint(["url_id"], ["urls.id"],
+                                name="fk_url_id__urls")
+    )
+
+    id = db.Column(db.Integer, nullable=False)
+    url_id = db.Column(db.Integer, nullable=False)
+    title = db.Column(db.String(256), nullable=False)
+    added_at = db.Column(db.DateTime, nullable=False)
+
+    url = db.relationship("Url", back_populates="postings")
+    tags = db.relationship(
+        'Tag', secondary=posting_tags, back_populates="postings")
+
+    @classmethod
+    def create(cls, title, url, tags):
+        url_object = Url.get_or_create(url)
+
+        tag_collection = [Tag.get_or_create(tag) for tag in tags]
+
+        posting = cls(
+            title=title,
+            url=url_object,
+            tags=tag_collection,
+            added_at=datetime.utcnow()
+        )
+
+        db.session.add(posting)
+
+        return posting
 
     @classmethod
     def get_latest(cls, count=20):

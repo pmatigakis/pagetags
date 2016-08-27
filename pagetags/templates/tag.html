@@ -8,8 +8,8 @@
 
     <h1>{{ tag.name }}</h1>
 
-    {% for url in paginator.items %}
-        <div><a href="{{ url.url }}">{{ url.title }}</a></div>
+    {% for posting in paginator.items %}
+        <div><a href="{{ posting.url.url }}">{{ posting.title }}</a></div>
     {% endfor %}
 
     <div>

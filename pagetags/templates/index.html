@@ -13,16 +13,16 @@
     </div>
 
     <div>
-        {% for url in latest_urls %}
+        {% for posting in latest_postings %}
             <div>
-                <div><a href="{{ url.url }}">{{ url.title }}</a></div>
-                <div><a href="{{ url.url }}">{{ url.url }}</a></div>
+                <div><a href="{{ posting.url.url }}">{{ posting.title }}</a></div>
+                <div><a href="{{ posting.url.url }}">{{ posting.url.url }}</a></div>
                 <div>
-                    {% for tag in url.tags %}
+                    {% for tag in posting.tags %}
                         {{ tag.name }}
                     {% endfor %}
                 </div>
-                <div>{{ url.added_at }}</div>
+                <div>{{ posting.added_at }}</div>
             </div>
         {% endfor %}
     </div>

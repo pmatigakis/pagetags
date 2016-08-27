@@ -11,7 +11,8 @@ setup(
         "Flask-WTF==0.12",
         "Flask-Login==0.3.2",
         "Flask-JWT==0.3.2",
-        "Flask-RESTful==0.3.5"
+        "Flask-RESTful==0.3.5",
+        "alembic==0.8.7"
     ],
     include_package_data=True,
     zip_safe=False,

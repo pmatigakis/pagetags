@@ -1,15 +1,16 @@
 from flask import (render_template, redirect, url_for, request, abort,
                    current_app)
 from flask_login import login_required, login_user, logout_user, current_user
+from sqlalchemy.exc import SQLAlchemyError
 
 from pagetags import forms, models, db
 
 
 @login_required
 def index():
-    latest_urls = models.Url.get_latest()
+    latest_postings = models.Posting.get_latest()
 
-    return render_template("index.html", latest_urls=latest_urls)
+    return render_template("index.html", latest_postings=latest_postings)
 
 
 @login_required
@@ -24,30 +25,16 @@ def new_url():
         msg = "adding url {} - {} - {}"
         current_app.logger.info(msg.format(title, url, ','.join(tags)))
 
-        url_object = models.Url.get_by_url(url)
-
-        if url_object is None:
-            models.Url.create(title, url, tags)
-        else:
-            url_object.tags = []
-
-            db.session.commit()
-
-            tag_objects = []
-
-            for tag in tags:
-                tag = models.Tag.get_or_create(tag)
-
-                db.session.commit()
-
-                tag_objects.append(tag)
-
-            url_object.tags = tag_objects
+        posting = models.Posting.create(title, url, tags)
 
         try:
             db.session.commit()
-        except db.SQLAlchemyError:
-            current_app.exception("failed to save utl {}".format(url))
+        except SQLAlchemyError:
+            db.session.rollback()
+
+            current_app.logger.exception("failed to save url {}".format(url))
+
+        current_app.logger.debug("Added posting with id %d", posting.id)
 
         return redirect(url_for("index"))
 
@@ -68,7 +55,7 @@ def tag(name):
         current_app.logger.info("tag '{}' doesn't exist".format(name))
         abort(404)
 
-    paginator = tag_object.get_urls_by_page(page)
+    paginator = tag_object.get_postings_by_page(page)
 
     return render_template("tag.html", tag=tag_object, paginator=paginator)
 

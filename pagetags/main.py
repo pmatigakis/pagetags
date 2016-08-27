@@ -8,7 +8,7 @@ from pagetags import login_manager
 from pagetags.models import db
 from pagetags.views import index, new_url, tag, login, logout
 from pagetags.authentication import load_user, authenticate, identity
-from pagetags.api import TagsResource, TagUrlsResource
+from pagetags.api import TagsResource, TagPostingsResource
 from pagetags import jwt
 
 
@@ -72,7 +72,7 @@ def create_app(settings_file, environment_type=None):
     api = Api(app)
 
     api.add_resource(TagsResource, "/api/v1/tags")
-    api.add_resource(TagUrlsResource, "/api/v1/tag/<tag>")
+    api.add_resource(TagPostingsResource, "/api/v1/tag/<tag>")
 
     jwt.authentication_callback = authenticate
     jwt.identity_callback = identity
