@@ -1,5 +1,6 @@
 import os
 from unittest import TestCase, main
+import time
 
 from sqlalchemy.exc import IntegrityError
 
@@ -475,6 +476,68 @@ class PostingCreationTests(TestCase):
             db.session.commit()
 
             self.assertIsNotNone(posting.id)
+
+
+class UrlPostingRetrievalTests(TestCase):
+    def setUp(self):
+        settings_file = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "settings.py")
+
+        self.db_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "test_pagetags.db")
+
+        try:
+            os.remove(self.db_path)
+        except:
+            pass
+
+        self.app = create_app(settings_file, "testing")
+
+        with self.app.app_context():
+            db.create_all()
+
+            self.assertEqual(db.session.query(Url).count(), 0)
+            self.assertEqual(db.session.query(Tag).count(), 0)
+            self.assertEqual(db.session.query(Posting).count(), 0)
+
+    def tearDown(self):
+        with self.app.app_context():
+            db.session.remove()
+            db.drop_all()
+            db.get_engine(self.app).dispose()
+
+        try:
+            os.remove(self.db_path)
+        except:
+            pass
+
+    def test_retrieve_url_postings(self):
+        with self.app.app_context():
+            Url.create("http://www.example.com/page_1")
+            Url.create("http://www.example.com/page_2")
+
+            db.session.commit()
+
+            Posting.create("page 1 test 1", "http://www.example.com/page_1",
+                           ["tag1", "tag2"])
+
+            db.session.commit()
+
+            # sleep for a while so that the next posting has a different
+            # added_at datetime
+            time.sleep(0.1)
+
+            Posting.create("page 1 test 2", "http://www.example.com/page_1",
+                           ["tag1", "tag3"])
+
+            db.session.commit()
+
+            postings = Url.get_postings("http://www.example.com/page_1")
+
+            self.assertEqual(len(postings), 2)
+
+            self.assertEqual(postings[0].title, "page 1 test 2")
+            self.assertEqual(postings[1].title, "page 1 test 1")
 
 
 if __name__ == "__main__":

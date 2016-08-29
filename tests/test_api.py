@@ -1,6 +1,8 @@
 import os
 from unittest import TestCase, main
 import json
+import urllib
+import time
 
 from pagetags.main import create_app
 from pagetags import db
@@ -206,6 +208,53 @@ class PostingApiTests(ApiTestCase):
         response = json.loads(response.data)
 
         self.assertIsNotNone(response.get("id"))
+
+
+class UrlAPIEndpointTests(ApiTestCase):
+    def test_retrieve_postings_by_url(self):
+        url = "http://www.example.com/page_1"
+        with self.app.app_context():
+            self.add_posting("page 1",
+                             url,
+                             ["tag1", "tag2"])
+
+            # sleep for a while so that the postings have different creation
+            # datetimes
+            time.sleep(0.1)
+
+            self.add_posting("page 11",
+                             url,
+                             ["tag1", "tag3"])
+
+            time.sleep(0.1)
+
+            self.add_posting("page 2",
+                             "http://www.example.com/page_2",
+                             ["tag1", "tag3"])
+
+        token = self.authenticate()
+
+        response = self.client.get(
+            "/api/v1/url?%s" % urllib.urlencode({"url": url}),
+            headers={"Authorization": "JWT %s" % token,
+                     "Content-Type": "application/json"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        response = json.loads(response.data)
+
+        self.assertEqual(len(response), 2)
+
+        self.assertEqual(response[0]["title"], "page 11")
+        self.assertEqual(response[0]["url"], url)
+        self.assertItemsEqual(response[0]["tags"], ["tag1", "tag3"])
+        self.assertIsNotNone(response[0]["added_at"])
+
+        self.assertEqual(response[1]["title"], "page 1")
+        self.assertEqual(response[1]["url"], url)
+        self.assertItemsEqual(response[1]["tags"], ["tag1", "tag2"])
+        self.assertIsNotNone(response[1]["added_at"])
 
 
 if __name__ == "__main__":

@@ -45,3 +45,19 @@ class PostingsResource(Resource):
             abort(500)
 
         return {"id": posting.id}
+
+
+class UrlResource(Resource):
+    @jwt_required()
+    def get(self):
+        args = reqparsers.url_query.parse_args()
+
+        return [
+            {
+                "title": posting.title,
+                "url": args.url,
+                "tags": [tag.name for tag in posting.tags],
+                "added_at": posting.added_at.strftime("%Y/%m/%d %H:%M:%S")
+            }
+            for posting in models.Url.get_postings(args.url)
+        ]

@@ -154,6 +154,15 @@ class Url(db.Model):
 
         return url_object
 
+    @classmethod
+    def get_postings(cls, url):
+        url_object = cls.get_by_url(url)
+
+        return db.session.query(Posting)\
+                         .filter(Posting.url == url_object)\
+                         .order_by(db.desc(Posting.added_at))\
+                         .all()
+
 
 class Posting(db.Model):
     __tablename__ = "postings"
