@@ -249,11 +249,13 @@ class UrlAPIEndpointTests(ApiTestCase):
 
         self.assertEqual(len(response), 2)
 
+        self.assertEqual(response[0]["id"], 2)
         self.assertEqual(response[0]["title"], "page 11")
         self.assertEqual(response[0]["url"], url)
         self.assertItemsEqual(response[0]["tags"], ["tag1", "tag3"])
         self.assertIsNotNone(response[0]["added_at"])
 
+        self.assertEqual(response[1]["id"], 1)
         self.assertEqual(response[1]["title"], "page 1")
         self.assertEqual(response[1]["url"], url)
         self.assertItemsEqual(response[1]["tags"], ["tag1", "tag2"])

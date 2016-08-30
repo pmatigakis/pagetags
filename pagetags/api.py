@@ -55,6 +55,7 @@ class UrlResource(Resource):
 
         return [
             {
+                "id": posting.id,
                 "title": posting.title,
                 "url": args.url,
                 "tags": posting.tag_names(),
