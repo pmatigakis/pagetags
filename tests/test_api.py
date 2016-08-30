@@ -117,7 +117,8 @@ class TagsTest(ApiTestCase):
             {
                 "id": 1,
                 "title": "page 1",
-                "url": "http://www.example.com/page_1"
+                "url": "http://www.example.com/page_1",
+                "tags": ["tag1", "tag2"]
             }
         )
 
@@ -126,7 +127,8 @@ class TagsTest(ApiTestCase):
             {
                 "id": 2,
                 "title": "page 2",
-                "url": "http://www.example.com/page_2"
+                "url": "http://www.example.com/page_2",
+                "tags": ["tag1", "tag3"]
             }
         )
 
@@ -144,7 +146,8 @@ class TagsTest(ApiTestCase):
             {
                 "id": 2,
                 "title": "page 2",
-                "url": "http://www.example.com/page_2"
+                "url": "http://www.example.com/page_2",
+                "tags": ["tag1", "tag3"]
             }
         )
 

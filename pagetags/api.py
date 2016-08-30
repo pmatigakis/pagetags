@@ -24,7 +24,8 @@ class TagPostingsResource(Resource):
             {
                 "id": posting.id,
                 "title": posting.title,
-                "url": posting.url.url
+                "url": posting.url.url,
+                "tags": posting.tag_names()
             }
             for posting in postings
         ]
@@ -56,7 +57,7 @@ class UrlResource(Resource):
             {
                 "title": posting.title,
                 "url": args.url,
-                "tags": [tag.name for tag in posting.tags],
+                "tags": posting.tag_names(),
                 "added_at": posting.added_at.strftime("%Y/%m/%d %H:%M:%S")
             }
             for posting in models.Url.get_postings(args.url)

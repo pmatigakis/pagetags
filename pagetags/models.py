@@ -204,3 +204,8 @@ class Posting(db.Model):
         return db.session.query(cls)\
                          .order_by(db.desc(cls.added_at))\
                          .limit(count)
+
+    def tag_names(self):
+        tags = [tag.name for tag in self.tags]
+
+        return sorted(tags)

@@ -477,6 +477,18 @@ class PostingCreationTests(TestCase):
 
             self.assertIsNotNone(posting.id)
 
+    def test_posting_name_tags(self):
+        with self.app.app_context():
+            posting = Posting.create(
+                "posting title",
+                "http://www.example.com",
+                ["tag1", "tag2"]
+            )
+
+            db.session.commit()
+
+            self.assertItemsEqual(posting.tag_names(), ["tag1", "tag2"])
+
 
 class UrlPostingRetrievalTests(TestCase):
     def setUp(self):
