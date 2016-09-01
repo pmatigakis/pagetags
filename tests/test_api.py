@@ -2,11 +2,12 @@ import os
 from unittest import TestCase, main
 import json
 import urllib
-import time
 
 from pagetags.main import create_app
 from pagetags import db
-from pagetags.models import User, Posting
+from pagetags.models import Posting
+
+from mock_data import load_users, load_mock_postings
 
 
 class ApiTestCase(TestCase):
@@ -25,13 +26,11 @@ class ApiTestCase(TestCase):
         self.app = create_app(settings_file, "testing")
 
         self.USERNAME = "user1"
-        self.PASSWORD = "password"
+        self.PASSWORD = "user1-password"
 
         with self.app.app_context():
             db.create_all()
-
-            User.create(self.USERNAME, self.PASSWORD)
-            db.session.commit()
+            load_users(db)
 
         self.client = self.app.test_client()
 
@@ -70,16 +69,13 @@ class ApiTestCase(TestCase):
 
 
 class TagsTest(ApiTestCase):
-    def test_get_tags(self):
+    def setUp(self):
+        super(TagsTest, self).setUp()
+
         with self.app.app_context():
-            self.add_posting("page 1",
-                             "http://www.example.com/page_1",
-                             ["tag1", "tag2"])
+            load_mock_postings(db)
 
-            self.add_posting("page 2",
-                             "http://www.example.com/page_2",
-                             ["tag1", "tag3"])
-
+    def test_get_tags(self):
         token = self.authenticate()
 
         response = self.client.get(
@@ -92,15 +88,6 @@ class TagsTest(ApiTestCase):
         self.assertItemsEqual(response, ["tag1", "tag2", "tag3"])
 
     def test_get_tag_urls(self):
-        with self.app.app_context():
-            self.add_posting("page 1",
-                             "http://www.example.com/page_1",
-                             ["tag1", "tag2"])
-
-            self.add_posting("page 2",
-                             "http://www.example.com/page_2",
-                             ["tag1", "tag3"])
-
         token = self.authenticate()
 
         response = self.client.get(
@@ -110,7 +97,7 @@ class TagsTest(ApiTestCase):
 
         response = json.loads(response.data)
 
-        self.assertEqual(len(response), 2)
+        self.assertEqual(len(response), 3)
 
         self.assertDictEqual(
             response[0],
@@ -132,8 +119,18 @@ class TagsTest(ApiTestCase):
             }
         )
 
+        self.assertDictEqual(
+            response[2],
+            {
+                "id": 3,
+                "title": "page 3",
+                "url": "http://www.example.com/page_1",
+                "tags": ["tag1", "tag3"]
+            }
+        )
+
         response = self.client.get(
-            "/api/v1/tag/tag3",
+            "/api/v1/tag/tag2",
             headers={"Authorization": "JWT %s" % token}
         )
 
@@ -144,10 +141,10 @@ class TagsTest(ApiTestCase):
         self.assertDictEqual(
             response[0],
             {
-                "id": 2,
-                "title": "page 2",
-                "url": "http://www.example.com/page_2",
-                "tags": ["tag1", "tag3"]
+                "id": 1,
+                "title": "page 1",
+                "url": "http://www.example.com/page_1",
+                "tags": ["tag1", "tag2"]
             }
         )
 
@@ -214,28 +211,16 @@ class PostingApiTests(ApiTestCase):
 
 
 class UrlAPIEndpointTests(ApiTestCase):
-    def test_retrieve_postings_by_url(self):
-        url = "http://www.example.com/page_1"
+    def setUp(self):
+        super(UrlAPIEndpointTests, self).setUp()
+
         with self.app.app_context():
-            self.add_posting("page 1",
-                             url,
-                             ["tag1", "tag2"])
+            load_mock_postings(db)
 
-            # sleep for a while so that the postings have different creation
-            # datetimes
-            time.sleep(0.1)
-
-            self.add_posting("page 11",
-                             url,
-                             ["tag1", "tag3"])
-
-            time.sleep(0.1)
-
-            self.add_posting("page 2",
-                             "http://www.example.com/page_2",
-                             ["tag1", "tag3"])
-
+    def test_retrieve_postings_by_url(self):
         token = self.authenticate()
+
+        url = "http://www.example.com/page_1"
 
         response = self.client.get(
             "/api/v1/url?%s" % urllib.urlencode({"url": url}),
@@ -249,8 +234,8 @@ class UrlAPIEndpointTests(ApiTestCase):
 
         self.assertEqual(len(response), 2)
 
-        self.assertEqual(response[0]["id"], 2)
-        self.assertEqual(response[0]["title"], "page 11")
+        self.assertEqual(response[0]["id"], 3)
+        self.assertEqual(response[0]["title"], "page 3")
         self.assertEqual(response[0]["url"], url)
         self.assertItemsEqual(response[0]["tags"], ["tag1", "tag3"])
         self.assertIsNotNone(response[0]["added_at"])
