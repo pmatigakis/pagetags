@@ -141,3 +141,17 @@ Response
     }
 ]
 ```
+
+### POST /api/v1/postings
+
+Add a new post
+
+Request body
+
+```javascript
+{
+    "title": "page title"
+    "url": "http://www.example.com/page_1",
+    "tags": ["tag1", "tag2"
+}
+```
