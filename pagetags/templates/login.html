@@ -1,40 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>PageTags - Login</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-    <h1>Login</h1>
+{% block title %}PageTags - Login{% endblock %}
 
-    <form action="{{ url_for('login') }}" method="POST">
-        {{ form.csrf_token }}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Login</h1>
 
-        <div>{{ form.username.label }}</div>
-        <div>{{ form.username }}</div>
-        <div>
-            {% if form.username.errors %}
-                <ul>
-                    {% for error in  form.username.errors%}
-                        <l1>{{ error }}</l1>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+            <form action="{{ url_for('login') }}" method="POST">
+                {{ form.csrf_token }}
+
+                <div>{{ form.username.label }}</div>
+                <div>{{ form.username }}</div>
+                <div>
+                    {% if form.username.errors %}
+                        <ul>
+                            {% for error in  form.username.errors%}
+                                <l1>{{ error }}</l1>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                <div>{{ form.password.label }}</div>
+                <div>{{ form.password }}</div>
+                <div>
+                    {% if form.password.errors %}
+                        <ul>
+                            {% for error in  form.password.errors%}
+                                <l1>{{ error }}</l1>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-default">Login</button>
+            </form>
         </div>
-        <div>{{ form.password.label }}</div>
-        <div>{{ form.password }}</div>
-        <div>
-            {% if form.password.errors %}
-                <ul>
-                    {% for error in  form.password.errors%}
-                        <l1>{{ error }}</l1>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        </div>
-        <input type="submit" value="Login" />
-    </form>
-
-</body>
-</html>
+    </div>
+{% endblock %}

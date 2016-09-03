@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-pills">
+              <li role="presentation"><a href="/">Postings</a></li>
+              <li role="presentation"><a href="{{ url_for('new_url') }}">New URL</a></li>
+              <li role="presentation"><a href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+
+    {% block application_page_content %}{% endblock %}
+{% endblock %}
+

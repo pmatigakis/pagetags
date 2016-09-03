@@ -1,51 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>PageTags - New URL</title>
-</head>
-<body>
-    <h1>Add url</h1>
+{% extends "application_page.html" %}
 
-    <div>
-        <form action="{{ url_for('new_url') }}" method="POST">
-            {{ form.csrf_token }}
+{% block title %}PageTags - New URL{% endblock %}
 
-            {{ form.title.label }} <br />
-            {{ form.title }} <br />
+{% block application_page_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Add url</h1>
 
-            {% if form.title.errors %}
-                <ul>
-                    {% for error in  form.title.errors%}
-                        <l1>{{ error }}</l1>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+            <form action="{{ url_for('new_url') }}" method="POST">
+                {{ form.csrf_token }}
 
-            {{ form.url.label }} <br />
-            {{ form.url }} <br />
+                {{ form.title.label }} <br />
+                {{ form.title }} <br />
 
-            {% if form.url.errors %}
-                <ul>
-                    {% for error in  form.url.errors%}
-                        <l1>{{ error }}</l1>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+                {% if form.title.errors %}
+                    <ul>
+                        {% for error in  form.title.errors%}
+                            <l1>{{ error }}</l1>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
 
-            {{ form.tags.label }} <br />
-            {{ form.tags }} <br />
+                {{ form.url.label }} <br />
+                {{ form.url }} <br />
 
-            {% if form.tags.errors %}
-                <ul>
-                    {% for error in  form.tags.errors%}
-                        <l1>{{ error }}</l1>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+                {% if form.url.errors %}
+                    <ul>
+                        {% for error in  form.url.errors%}
+                            <l1>{{ error }}</l1>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
 
-            <input type="submit" value="add" />
-        </form>
+                {{ form.tags.label }} <br />
+                {{ form.tags }} <br />
+
+                {% if form.tags.errors %}
+                    <ul>
+                        {% for error in  form.tags.errors%}
+                            <l1>{{ error }}</l1>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <button type="submit" class="btn btn-default">Add</button>
+            </form>
+        </div>
     </div>
-</body>
-</html>
+{% endblock %}

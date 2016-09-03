@@ -1,38 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>PageTags</title>
-</head>
-<body>
-    <h1>Urls</h1>
+{% extends "application_page.html" %}
 
-    <div>
-        <a href="{{ url_for('new_url') }}">New URL</a>
-        <a href="{{ url_for('logout') }}">Logout</a>
-    </div>
+{% block title %}PageTags{% endblock %}
 
-    <div>
-        {% for posting in paginator.items %}
-            <div>
-                <div><a href="{{ posting.url.url }}">{{ posting.title }}</a></div>
-                <div><a href="{{ posting.url.url }}">{{ posting.url.url }}</a></div>
-                <div>
-                    {% for tag in posting.tags %}
-                        <a href="{{ url_for('tag', name=tag.name) }}">{{ tag.name }}</a>
-                    {% endfor %}
+{% block application_page_content %}
+    <div class="row">
+        <div class="col-md-12">
+            {% for posting in paginator.items %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <ul class="posting">
+                            <li><a href="{{ posting.url.url }}">{{ posting.title }}</a></li>
+                            <li><a href="{{ posting.url.url }}">{{ posting.url.url }}</a></li>
+                            <li>
+                                <ul class="tag_list">
+                                {% for tag in posting.tags %}
+                                    <li><a href="{{ url_for('tag', name=tag.name) }}">{{ tag.name }}</a></li>
+                                {% endfor %}
+                                </ul>
+                            </li>
+                            <li>Added at {{ posting.added_at.strftime("%Y/%m/%d %H:%M:%S") }}</li>
+                        </ul>
+                    </div>
                 </div>
-                <div>{{ posting.added_at.strftime("%Y/%m/%d %H:%M:%S") }}</div>
-            </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
     </div>
 
-    {% if paginator.has_prev %}
-        <a href="{{ url_for('index') }}?page={{ paginator.prev_num }}">Previous</a>
-    {% endif %}
+    <div class="row">
+        <div class="col-md-12">
+            <span>Page {{ paginator.page }}</span>
 
-    {% if paginator.has_next %}
-        <a href="{{ url_for('index') }}?page={{ paginator.next_num }}">Next</a>
-    {% endif %}
-</body>
-</html>
+            {% if paginator.has_prev %}
+                <a href="{{ url_for('index') }}?page={{ paginator.prev_num }}">Previous</a>
+            {% endif %}
+
+            {% if paginator.has_next %}
+                <a href="{{ url_for('index') }}?page={{ paginator.next_num }}">Next</a>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

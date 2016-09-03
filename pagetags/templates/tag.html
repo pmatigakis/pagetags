@@ -1,33 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>PageTags - Tag - {{ tag.name }}</title>
-</head>
-    <h1>{{ tag.name }}</h1>
+{% extends "application_page.html" %}
 
-    {% for posting in paginator.items %}
-        <div><a href="{{ posting.url.url }}">{{ posting.title }}</a></div>
-    {% endfor %}
+{% block title %}PageTags - Tag - {{ tag.name }}{% endblock %}
 
-    <div>
-        {% if paginator.has_prev %}
-        <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.prev_num }}">prev</a>
-        {% endif %}
+{% block application_page_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h1>{{ tag.name }}</h1>
 
-        {% if paginator.has_next %}
-        <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.next_num }}">next</a>
-        {% endif %}
+            {% for posting in paginator.items %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <ul class="posting">
+                            <li><a href="{{ posting.url.url }}">{{ posting.title }}</a></li>
+                            <li><a href="{{ posting.url.url }}">{{ posting.url.url }}</a></li>
+                            <li>
+                                <ul class="tag_list">
+                                {% for tag in posting.tags %}
+                                    <li><a href="{{ url_for('tag', name=tag.name) }}">{{ tag.name }}</a></li>
+                                {% endfor %}
+                                </ul>
+                            </li>
+                            <li>Added at {{ posting.added_at.strftime("%Y/%m/%d %H:%M:%S") }}</li>
+                        </ul>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div>
+                {% if paginator.has_prev %}
+                <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.prev_num }}">prev</a>
+                {% endif %}
+
+                {% if paginator.has_next %}
+                <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.next_num }}">next</a>
+                {% endif %}
+            </div>
+        </div>
     </div>
 
-    {% if paginator.has_prev %}
-        <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.prev_num }}">Previous</a>
-    {% endif %}
+    <div class="row">
+        <div class="col-md-12">
+            <span>Page {{ paginator.page }}</span>
 
-    {% if paginator.has_next %}
-        <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.next_num }}">Next</a>
-    {% endif %}
+            {% if paginator.has_prev %}
+                <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.prev_num }}">Previous</a>
+            {% endif %}
 
-
-</body>
-</html>
+            {% if paginator.has_next %}
+                <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.next_num }}">Next</a>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
