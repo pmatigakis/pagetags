@@ -150,8 +150,8 @@ Request body
 
 ```javascript
 {
-    "title": "page title"
+    "title": "page title",
     "url": "http://www.example.com/page_1",
-    "tags": ["tag1", "tag2"
+    "tags": ["tag1", "tag2"]
 }
 ```
