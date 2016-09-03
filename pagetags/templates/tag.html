@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <title>PageTags - Tag - {{ tag.name }}</title>
 </head>
-<a>
-
     <h1>{{ tag.name }}</h1>
 
     {% for posting in paginator.items %}
@@ -21,6 +19,15 @@
         <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.next_num }}">next</a>
         {% endif %}
     </div>
+
+    {% if paginator.has_prev %}
+        <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.prev_num }}">Previous</a>
+    {% endif %}
+
+    {% if paginator.has_next %}
+        <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.next_num }}">Next</a>
+    {% endif %}
+
 
 </body>
 </html>

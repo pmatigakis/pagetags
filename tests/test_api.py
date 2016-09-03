@@ -85,7 +85,8 @@ class TagsTest(ApiTestCase):
 
         response = json.loads(response.data)
 
-        self.assertItemsEqual(response, ["tag1", "tag2", "tag3"])
+        self.assertItemsEqual(response,
+                              ["tag1", "tag2", "tag3", "tag4", "tag5"])
 
     def test_get_tag_urls(self):
         token = self.authenticate()

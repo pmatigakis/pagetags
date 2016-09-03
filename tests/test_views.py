@@ -165,7 +165,7 @@ class UrlUpdateTests(WebTestCase):
         request_data = {
             "title": "test url",
             "url": "http://www.example.com/page_1",
-            "tags": "tag1, tag4"
+            "tags": "tag1, tag11"
         }
 
         response = self.client.post("/new_url",
@@ -176,9 +176,8 @@ class UrlUpdateTests(WebTestCase):
         self.assertIn("test url</a>", response.data)
         self.assertIn("http://www.example.com/page_1</a>", response.data)
         self.assertIn("tag1", response.data)
-        self.assertIn("tag2", response.data)
-        self.assertIn("tag3", response.data)
-        self.assertIn("tag4", response.data)
+        self.assertIn("tag11", response.data)
+        self.assertNotIn("tag2", response.data)
 
         self.logout()
 
@@ -197,32 +196,169 @@ class TagViewTests(WebTestCase):
 
         self.assertIn("<title>PageTags - Tag - tag1</title>", response.data)
 
-        self.assertIn("page 1</a>", response.data)
-        self.assertIn("http://www.example.com/page_1\">", response.data)
+        self.assertNotIn(
+            "<a href=\"http://www.example.com/page_1\">page 1</a>",
+            response.data
+        )
 
-        self.assertIn("page 2</a>", response.data)
-        self.assertIn("http://www.example.com/page_2\">", response.data)
+        self.assertIn(
+            "<a href=\"http://www.example.com/page_2\">page 2</a>",
+            response.data
+        )
 
-        self.assertIn("page 3</a>", response.data)
+        self.assertIn(
+            "<a href=\"http://www.example.com/page_1\">page 3</a>",
+            response.data
+        )
 
-        response = self.client.get("/tag/tag2")
+        self.assertNotIn(
+            "<a href=\"http://www.example.com/page_4\">page 4</a>",
+            response.data
+        )
 
-        self.assertIn("<title>PageTags - Tag - tag2</title>", response.data)
+        self.assertNotIn(
+            "<a href=\"/tag/tag1?page=0\">Previous</a>",
+            response.data
+        )
 
-        self.assertNotIn("page 2</a>", response.data)
-        self.assertNotIn("http://www.example.com/page_2\">", response.data)
+        self.assertIn(
+            "<a href=\"/tag/tag1?page=2\">Next</a>",
+            response.data
+        )
 
-        self.assertIn("page 1</a>", response.data)
-        self.assertIn("http://www.example.com/page_1\">", response.data)
+        self.logout()
+
+    def test_view_tag_page_2(self):
+        self.login()
+
+        response = self.client.get("/tag/tag1?page=2")
+
+        self.assertIn("<title>PageTags - Tag - tag1</title>", response.data)
+
+        self.assertIn(
+            "<a href=\"http://www.example.com/page_1\">page 1</a>",
+            response.data
+        )
+
+        self.assertNotIn(
+            "<a href=\"http://www.example.com/page_2\">page 2</a>",
+            response.data
+        )
+
+        self.assertNotIn(
+            "<a href=\"http://www.example.com/page_1\">page 3</a>",
+            response.data
+        )
+
+        self.assertNotIn(
+            "<a href=\"http://www.example.com/page_4\">page 4</a>",
+            response.data
+        )
+
+        self.assertIn(
+            "<a href=\"/tag/tag1?page=1\">Previous</a>",
+            response.data
+        )
+
+        self.assertNotIn(
+            "<a href=\"/tag/tag1?page=2\">Next</a>",
+            response.data
+        )
 
         self.logout()
 
     def test_do_not_raise_an_error_if_tag_does_not_exist(self):
         self.login()
 
-        response = self.client.get("/tag/tag4")
+        response = self.client.get("/tag/tag444")
 
         self.assertIn("<title>404 Not Found</title>", response.data)
+
+        self.logout()
+
+
+class FrontPageViewtests(WebTestCase):
+    def setUp(self):
+        super(FrontPageViewtests, self).setUp()
+
+        with self.app.app_context():
+            load_mock_postings(db)
+
+    def test_front_page(self):
+        self.login()
+
+        response = self.client.get("/")
+
+        self.assertIn("<a href=\"/new_url\">New URL</a>", response.data)
+        self.assertIn("<a href=\"/logout\">Logout</a>", response.data)
+
+        self.assertIn(
+            "<a href=\"http://www.example.com/page_4\">page 4</a>",
+            response.data
+        )
+
+        self.assertIn(
+            "<a href=\"http://www.example.com/page_1\">page 3</a>",
+            response.data
+        )
+
+        self.assertIn(
+            "<a href=\"http://www.example.com/page_2\">page 2</a>",
+            response.data
+        )
+
+        self.assertNotIn(
+            "<a href=\"http://www.example.com/page_1\">page 1</a>",
+            response.data
+        )
+
+        self.assertIn("<a href=\"/tag/tag1\">tag1</a>", response.data)
+        self.assertIn("<a href=\"/tag/tag3\">tag3</a>", response.data)
+        self.assertIn("<a href=\"/tag/tag4\">tag4</a>", response.data)
+        self.assertIn("<a href=\"/tag/tag5\">tag5</a>", response.data)
+        self.assertNotIn("<a href=\"/tag/tag2\">tag2</a>", response.data)
+
+        self.assertIn("<a href=\"/?page=2\">Next</a>", response.data)
+        self.assertNotIn("<a href=\"/?page=0\">Previous</a>", response.data)
+
+        self.logout()
+
+    def test_front_page_page_2(self):
+        self.login()
+
+        response = self.client.get("/?page=2")
+
+        self.assertIn("<a href=\"/new_url\">New URL</a>", response.data)
+        self.assertIn("<a href=\"/logout\">Logout</a>", response.data)
+
+        self.assertNotIn(
+            "<a href=\"http://www.example.com/page_4\">page 4</a>",
+            response.data
+        )
+
+        self.assertNotIn(
+            "<a href=\"http://www.example.com/page_1\">page 3</a>",
+            response.data
+        )
+
+        self.assertNotIn(
+            "<a href=\"http://www.example.com/page_2\">page 2</a>",
+            response.data
+        )
+
+        self.assertIn(
+            "<a href=\"http://www.example.com/page_1\">page 1</a>",
+            response.data
+        )
+
+        self.assertIn("<a href=\"/tag/tag1\">tag1</a>", response.data)
+        self.assertNotIn("<a href=\"/tag/tag3\">tag3</a>", response.data)
+        self.assertNotIn("<a href=\"/tag/tag4\">tag4</a>", response.data)
+        self.assertNotIn("<a href=\"/tag/tag5\">tag5</a>", response.data)
+        self.assertIn("<a href=\"/tag/tag2\">tag2</a>", response.data)
+
+        self.assertNotIn("<a href=\"/?page=2\">Next</a>", response.data)
+        self.assertIn("<a href=\"/?page=1\">Previous</a>", response.data)
 
         self.logout()
 

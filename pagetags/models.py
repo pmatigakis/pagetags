@@ -209,3 +209,9 @@ class Posting(db.Model):
         tags = [tag.name for tag in self.tags]
 
         return sorted(tags)
+
+    @classmethod
+    def get_latest_by_page(cls, page, per_page=10):
+        return cls.query\
+                  .order_by(db.desc(cls.added_at))\
+                  .paginate(page=page, per_page=per_page)
