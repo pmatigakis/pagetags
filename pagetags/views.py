@@ -9,9 +9,9 @@ from pagetags import forms, models, db, reqparsers
 def index():
     front_page_item_count = current_app.config["FRONT_PAGE_ITEM_COUNT"]
 
-    args = reqparsers.postings.parse_args()
+    args = reqparsers.posts.parse_args()
 
-    paginator = models.Posting.get_latest_by_page(
+    paginator = models.Post.get_latest_by_page(
         page=args.page, per_page=front_page_item_count)
 
     return render_template("index.html", paginator=paginator)
@@ -29,7 +29,7 @@ def new_url():
         msg = u"adding url {} - {} - {}"
         current_app.logger.info(msg.format(title, url, ','.join(tags)))
 
-        posting = models.Posting.create(title, url, tags)
+        posting = models.Post.create(title, url, tags)
 
         try:
             db.session.commit()
@@ -47,9 +47,9 @@ def new_url():
 
 @login_required
 def tag(name):
-    args = reqparsers.tag_postings.parse_args()
+    args = reqparsers.tag_posts.parse_args()
 
-    postings_item_count = current_app.config["TAG_POSTINGS_PER_PAGE"]
+    postings_item_count = current_app.config["TAG_POSTS_PER_PAGE"]
 
     msg = u"requested page for tag '{}': {}"
     current_app.logger.info(msg.format(name, args.page))
@@ -60,7 +60,7 @@ def tag(name):
         current_app.logger.info(u"tag '{}' doesn't exist".format(name))
         abort(404)
 
-    paginator = tag_object.get_postings_by_page(
+    paginator = tag_object.get_posts_by_page(
         args.page, per_page=postings_item_count)
 
     return render_template("tag.html", tag=tag_object, paginator=paginator)

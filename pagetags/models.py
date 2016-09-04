@@ -6,12 +6,12 @@ from flask_login import UserMixin
 from pagetags import db
 
 
-posting_tags = db.Table(
-    "posting_tags",
-    db.Column("posting_id", db.Integer, nullable=False),
+post_tags = db.Table(
+    "post_tags",
+    db.Column("post_id", db.Integer, nullable=False),
     db.Column("tag_id", db.Integer, nullable=False),
     db.ForeignKeyConstraint(
-        ["posting_id"], ["postings.id"], name="fk_posting_id__postings"),
+        ["post_id"], ["posts.id"], name="fk_post_id__posts"),
     db.ForeignKeyConstraint(["tag_id"], ["tags.id"], name="fk_tag_id__tags"),
 )
 
@@ -77,8 +77,7 @@ class Tag(db.Model):
     id = db.Column(db.Integer, nullable=False)
     name = db.Column(db.String(100), nullable=False)
 
-    postings = db.relationship(
-        'Posting', secondary=posting_tags, back_populates="tags")
+    posts = db.relationship('Post', secondary=post_tags, back_populates="tags")
 
     @classmethod
     def get_by_name(cls, name):
@@ -101,15 +100,15 @@ class Tag(db.Model):
 
         return tag
 
-    def get_postings_by_page(self, page, per_page=10):
-        return Posting.query\
-                      .filter(Posting.tags.contains(self))\
-                      .order_by(db.desc(Posting.added_at))\
-                      .paginate(page=page, per_page=per_page)
+    def get_posts_by_page(self, page, per_page=10):
+        return Post.query\
+                   .filter(Post.tags.contains(self))\
+                   .order_by(db.desc(Post.added_at))\
+                   .paginate(page=page, per_page=per_page)
 
-    def get_postings(self):
-        return db.session.query(Posting)\
-                         .filter(Posting.tags.contains(self))\
+    def get_posts(self):
+        return db.session.query(Post)\
+                         .filter(Post.tags.contains(self))\
                          .all()
 
 
@@ -125,7 +124,7 @@ class Url(db.Model):
     url = db.Column(db.String(1024), nullable=False)
     added_at = db.Column(db.DateTime, nullable=False)
 
-    postings = db.relationship("Posting", back_populates="url")
+    posts = db.relationship("Post", back_populates="url")
 
     @classmethod
     def create(cls, url):
@@ -155,20 +154,20 @@ class Url(db.Model):
         return url_object
 
     @classmethod
-    def get_postings(cls, url):
+    def get_posts(cls, url):
         url_object = cls.get_by_url(url)
 
-        return db.session.query(Posting)\
-                         .filter(Posting.url == url_object)\
-                         .order_by(db.desc(Posting.added_at))\
+        return db.session.query(Post)\
+                         .filter(Post.url == url_object)\
+                         .order_by(db.desc(Post.added_at))\
                          .all()
 
 
-class Posting(db.Model):
-    __tablename__ = "postings"
+class Post(db.Model):
+    __tablename__ = "posts"
 
     __table_args__ = (
-        db.PrimaryKeyConstraint("id", name="pk_postings"),
+        db.PrimaryKeyConstraint("id", name="pk_posts"),
         db.ForeignKeyConstraint(["url_id"], ["urls.id"],
                                 name="fk_url_id__urls")
     )
@@ -178,9 +177,8 @@ class Posting(db.Model):
     title = db.Column(db.String(256), nullable=False)
     added_at = db.Column(db.DateTime, nullable=False)
 
-    url = db.relationship("Url", back_populates="postings")
-    tags = db.relationship(
-        'Tag', secondary=posting_tags, back_populates="postings")
+    url = db.relationship("Url", back_populates="posts")
+    tags = db.relationship('Tag', secondary=post_tags, back_populates="posts")
 
     @classmethod
     def create(cls, title, url, tags):
@@ -188,16 +186,16 @@ class Posting(db.Model):
 
         tag_collection = [Tag.get_or_create(tag) for tag in tags]
 
-        posting = cls(
+        post = cls(
             title=title,
             url=url_object,
             tags=tag_collection,
             added_at=datetime.utcnow()
         )
 
-        db.session.add(posting)
+        db.session.add(post)
 
-        return posting
+        return post
 
     @classmethod
     def get_latest(cls, count=20):

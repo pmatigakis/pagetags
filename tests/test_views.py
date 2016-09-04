@@ -4,7 +4,7 @@ from unittest import TestCase, main
 from pagetags.main import create_app
 from pagetags import db
 
-from mock_data import load_users, load_mock_postings
+from mock_data import load_users, load_mock_posts
 
 
 class WebTestCase(TestCase):
@@ -157,7 +157,7 @@ class UrlUpdateTests(WebTestCase):
         super(UrlUpdateTests, self).setUp()
 
         with self.app.app_context():
-            load_mock_postings(db)
+            load_mock_posts(db)
 
     def test_tags_are_updated_when_adding_the_url_again(self):
         self.login()
@@ -187,7 +187,7 @@ class TagViewTests(WebTestCase):
         super(TagViewTests, self).setUp()
 
         with self.app.app_context():
-            load_mock_postings(db)
+            load_mock_posts(db)
 
     def test_view_tag(self):
         self.login()
@@ -282,7 +282,7 @@ class FrontPageViewtests(WebTestCase):
         super(FrontPageViewtests, self).setUp()
 
         with self.app.app_context():
-            load_mock_postings(db)
+            load_mock_posts(db)
 
     def test_front_page(self):
         self.login()

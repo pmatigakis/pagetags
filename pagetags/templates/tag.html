@@ -7,20 +7,20 @@
         <div class="col-md-12">
             <h1>{{ tag.name }}</h1>
 
-            {% for posting in paginator.items %}
+            {% for post in paginator.items %}
                 <div class="row">
                     <div class="col-md-12">
-                        <ul class="posting">
-                            <li><a href="{{ posting.url.url }}">{{ posting.title }}</a></li>
-                            <li><a href="{{ posting.url.url }}">{{ posting.url.url }}</a></li>
+                        <ul class="post">
+                            <li><a href="{{ post.url.url }}">{{ post.title }}</a></li>
+                            <li><a href="{{ post.url.url }}">{{ post.url.url }}</a></li>
                             <li>
                                 <ul class="tag_list">
-                                {% for tag in posting.tags %}
+                                {% for tag in post.tags %}
                                     <li><a href="{{ url_for('tag', name=tag.name) }}">{{ tag.name }}</a></li>
                                 {% endfor %}
                                 </ul>
                             </li>
-                            <li>Added at {{ posting.added_at.strftime("%Y/%m/%d %H:%M:%S") }}</li>
+                            <li>Added at {{ post.added_at.strftime("%Y/%m/%d %H:%M:%S") }}</li>
                         </ul>
                     </div>
                 </div>

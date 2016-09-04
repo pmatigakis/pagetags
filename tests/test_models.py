@@ -6,8 +6,10 @@ from sqlalchemy.exc import IntegrityError
 
 from werkzeug.security import check_password_hash
 from pagetags.main import create_app
-from pagetags.models import User, Tag, Posting, Url
+from pagetags.models import User, Tag, Post, Url
 from pagetags import db
+
+from mock_data import load_mock_posts
 
 
 class UserCreationModelTests(TestCase):
@@ -423,7 +425,7 @@ class UrlCreationTests(TestCase):
             self.assertEqual(url.url, "http://www.example.com")
 
 
-class PostingCreationTests(TestCase):
+class PostCreationTests(TestCase):
     def setUp(self):
         settings_file = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "settings.py")
@@ -443,7 +445,7 @@ class PostingCreationTests(TestCase):
 
             self.assertEqual(db.session.query(Url).count(), 0)
             self.assertEqual(db.session.query(Tag).count(), 0)
-            self.assertEqual(db.session.query(Posting).count(), 0)
+            self.assertEqual(db.session.query(Post).count(), 0)
 
     def tearDown(self):
         with self.app.app_context():
@@ -458,39 +460,39 @@ class PostingCreationTests(TestCase):
 
     def test_create_posting(self):
         with self.app.app_context():
-            posting = Posting.create(
-                "posting title",
+            post = Post.create(
+                "post title",
                 "http://www.example.com",
                 ["tag1", "tag2"]
             )
 
-            self.assertIsNotNone(posting)
-            self.assertIsNone(posting.id)
-            self.assertEqual(posting.title, "posting title")
-            self.assertEqual(posting.url.url, "http://www.example.com")
+            self.assertIsNotNone(post)
+            self.assertIsNone(post.id)
+            self.assertEqual(post.title, "post title")
+            self.assertEqual(post.url.url, "http://www.example.com")
             self.assertItemsEqual(
-                [tag.name for tag in posting.tags],
+                [tag.name for tag in post.tags],
                 ["tag1", "tag2"]
             )
 
             db.session.commit()
 
-            self.assertIsNotNone(posting.id)
+            self.assertIsNotNone(post.id)
 
-    def test_posting_name_tags(self):
+    def test_post_name_tags(self):
         with self.app.app_context():
-            posting = Posting.create(
-                "posting title",
+            post = Post.create(
+                "post title",
                 "http://www.example.com",
                 ["tag1", "tag2"]
             )
 
             db.session.commit()
 
-            self.assertItemsEqual(posting.tag_names(), ["tag1", "tag2"])
+            self.assertItemsEqual(post.tag_names(), ["tag1", "tag2"])
 
 
-class UrlPostingRetrievalTests(TestCase):
+class UrlPostRetrievalTests(TestCase):
     def setUp(self):
         settings_file = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "settings.py")
@@ -510,7 +512,7 @@ class UrlPostingRetrievalTests(TestCase):
 
             self.assertEqual(db.session.query(Url).count(), 0)
             self.assertEqual(db.session.query(Tag).count(), 0)
-            self.assertEqual(db.session.query(Posting).count(), 0)
+            self.assertEqual(db.session.query(Post).count(), 0)
 
     def tearDown(self):
         with self.app.app_context():
@@ -523,15 +525,15 @@ class UrlPostingRetrievalTests(TestCase):
         except:
             pass
 
-    def test_retrieve_url_postings(self):
+    def test_retrieve_url_posts(self):
         with self.app.app_context():
             Url.create("http://www.example.com/page_1")
             Url.create("http://www.example.com/page_2")
 
             db.session.commit()
 
-            Posting.create("page 1 test 1", "http://www.example.com/page_1",
-                           ["tag1", "tag2"])
+            Post.create("page 1 test 1", "http://www.example.com/page_1",
+                        ["tag1", "tag2"])
 
             db.session.commit()
 
@@ -539,17 +541,64 @@ class UrlPostingRetrievalTests(TestCase):
             # added_at datetime
             time.sleep(0.1)
 
-            Posting.create("page 1 test 2", "http://www.example.com/page_1",
-                           ["tag1", "tag3"])
+            Post.create("page 1 test 2", "http://www.example.com/page_1",
+                        ["tag1", "tag3"])
 
             db.session.commit()
 
-            postings = Url.get_postings("http://www.example.com/page_1")
+            posts = Url.get_posts("http://www.example.com/page_1")
 
-            self.assertEqual(len(postings), 2)
+            self.assertEqual(len(posts), 2)
 
-            self.assertEqual(postings[0].title, "page 1 test 2")
-            self.assertEqual(postings[1].title, "page 1 test 1")
+            self.assertEqual(posts[0].title, "page 1 test 2")
+            self.assertEqual(posts[1].title, "page 1 test 1")
+
+
+class PostPaginationTests(TestCase):
+    def setUp(self):
+        settings_file = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "settings.py")
+
+        self.db_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "test_pagetags.db")
+
+        try:
+            os.remove(self.db_path)
+        except:
+            pass
+
+        self.app = create_app(settings_file, "testing")
+
+        with self.app.app_context():
+            db.create_all()
+
+            load_mock_posts(db)
+
+    def tearDown(self):
+        with self.app.app_context():
+            db.session.remove()
+            db.drop_all()
+            db.get_engine(self.app).dispose()
+
+        try:
+            os.remove(self.db_path)
+        except:
+            pass
+
+    def test_get_latest_by_page(self):
+        with self.app.app_context():
+            paginator = Post.get_latest_by_page(page=1, per_page=2)
+
+            self.assertEqual(len(paginator.items), 2)
+            self.assertEqual(paginator.pages, 2)
+            self.assertEqual(paginator.page, 1)
+
+            self.assertEqual(paginator.items[0].title, "page 4")
+            self.assertEqual(paginator.items[1].title, "page 3")
+
+            self.assertFalse(paginator.has_prev)
+            self.assertTrue(paginator.has_next)
+            self.assertEqual(paginator.next_num, 2)
 
 
 if __name__ == "__main__":

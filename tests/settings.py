@@ -8,4 +8,4 @@ db_path = os.path.join(
 SQLALCHEMY_DATABASE_URI = "sqlite:///%s" % db_path
 
 FRONT_PAGE_ITEM_COUNT = 3
-TAG_POSTINGS_PER_PAGE = 2
+TAG_POSTS_PER_PAGE = 2

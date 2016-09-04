@@ -5,9 +5,9 @@ import urllib
 
 from pagetags.main import create_app
 from pagetags import db
-from pagetags.models import Posting
+from pagetags.models import Post
 
-from mock_data import load_users, load_mock_postings
+from mock_data import load_users, load_mock_posts
 
 
 class ApiTestCase(TestCase):
@@ -46,7 +46,7 @@ class ApiTestCase(TestCase):
             pass
 
     def add_posting(self, title, url, tags):
-        Posting.create(title, url, tags)
+        Post.create(title, url, tags)
 
         db.session.commit()
 
@@ -73,7 +73,7 @@ class TagsTest(ApiTestCase):
         super(TagsTest, self).setUp()
 
         with self.app.app_context():
-            load_mock_postings(db)
+            load_mock_posts(db)
 
     def test_get_tags(self):
         token = self.authenticate()
@@ -216,7 +216,7 @@ class UrlAPIEndpointTests(ApiTestCase):
         super(UrlAPIEndpointTests, self).setUp()
 
         with self.app.app_context():
-            load_mock_postings(db)
+            load_mock_posts(db)
 
     def test_retrieve_postings_by_url(self):
         token = self.authenticate()

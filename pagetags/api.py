@@ -18,25 +18,25 @@ class TagPostingsResource(Resource):
     def get(self, tag):
         tag = models.Tag.get_by_name(tag)
 
-        postings = tag.get_postings()
+        posts = tag.get_posts()
 
         return [
             {
-                "id": posting.id,
-                "title": posting.title,
-                "url": posting.url.url,
-                "tags": posting.tag_names()
+                "id": post.id,
+                "title": post.title,
+                "url": post.url.url,
+                "tags": post.tag_names()
             }
-            for posting in postings
+            for post in posts
         ]
 
 
 class PostingsResource(Resource):
     @jwt_required()
     def post(self):
-        args = reqparsers.posting.parse_args()
+        args = reqparsers.post.parse_args()
 
-        posting = models.Posting.create(args.title, args.url, args.tags)
+        post = models.Post.create(args.title, args.url, args.tags)
 
         try:
             db.session.commit()
@@ -45,7 +45,7 @@ class PostingsResource(Resource):
 
             abort(500)
 
-        return {"id": posting.id}
+        return {"id": post.id}
 
 
 class UrlResource(Resource):
@@ -55,11 +55,11 @@ class UrlResource(Resource):
 
         return [
             {
-                "id": posting.id,
-                "title": posting.title,
+                "id": post.id,
+                "title": post.title,
                 "url": args.url,
-                "tags": posting.tag_names(),
-                "added_at": posting.added_at.strftime("%Y/%m/%d %H:%M:%S")
+                "tags": post.tag_names(),
+                "added_at": post.added_at.strftime("%Y/%m/%d %H:%M:%S")
             }
-            for posting in models.Url.get_postings(args.url)
+            for post in models.Url.get_posts(args.url)
         ]
