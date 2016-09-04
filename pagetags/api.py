@@ -13,7 +13,7 @@ class TagsResource(Resource):
         return [tag.name for tag in tags]
 
 
-class TagPostingsResource(Resource):
+class TagPostsResource(Resource):
     @jwt_required()
     def get(self, tag):
         tag = models.Tag.get_by_name(tag)
@@ -31,7 +31,7 @@ class TagPostingsResource(Resource):
         ]
 
 
-class PostingsResource(Resource):
+class PostsResource(Resource):
     @jwt_required()
     def post(self):
         args = reqparsers.post.parse_args()

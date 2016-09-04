@@ -187,7 +187,7 @@ class ApiAuthenticationTests(ApiTestCase):
         self.assertIsInstance(response["access_token"], unicode)
 
 
-class PostingApiTests(ApiTestCase):
+class PostApiTests(ApiTestCase):
     def test_add_posting(self):
         token = self.authenticate()
 
@@ -198,7 +198,7 @@ class PostingApiTests(ApiTestCase):
         }
 
         response = self.client.post(
-            "/api/v1/postings",
+            "/api/v1/posts",
             headers={"Authorization": "JWT %s" % token,
                      "Content-Type": "application/json"},
             data=json.dumps(posting)

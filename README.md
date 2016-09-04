@@ -116,7 +116,7 @@ Response
 [
     {
         "id": 123,
-        "title": "posting title",
+        "title": "post title",
         "url": "http://www.example.com/page_1",
         "tags": ["tag1", "tag2"]
     }
@@ -133,7 +133,7 @@ Response
 [
     {
         "id": 123,
-        "title": "posting title",
+        "title": "post title",
         "url": "http://www.example.com/page_1",
         "tags": ["tag1", "tag2"],
         "added_at": "2016/01/01 16:00:00"
@@ -141,7 +141,7 @@ Response
 ]
 ```
 
-### POST /api/v1/postings
+### POST /api/v1/posts
 
 Add a new post
 
