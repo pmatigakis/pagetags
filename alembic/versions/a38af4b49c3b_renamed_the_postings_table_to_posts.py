@@ -24,9 +24,7 @@ def upgrade():
 
     op.drop_constraint("pk_postings", "postings")
     op.create_primary_key("pk_posts", "postings", ["id"])
-    op.execute(CreateSequence(Sequence("posts_id_seq")))
-    op.alter_column("postings", "id", server_default=sa.text(u"nextval('posts_id_seq'::regclass)"))
-    op.execute(DropSequence(Sequence("postings_id_seq")))
+    op.execute("ALTER SEQUENCE postings_id_seq RENAME TO posts_id_seq")
 
     op.create_foreign_key("fk_post_id__posts", "posting_tags", "postings", ["post_id"], ["id"])
 
@@ -40,9 +38,7 @@ def downgrade():
 
     op.drop_constraint("pk_posts", "posts")
     op.create_primary_key("pk_postings", "posts", ["id"])
-    op.execute(CreateSequence(Sequence("postings_id_seq")))
-    op.alter_column("posts", "id", server_default=sa.text(u"nextval('postings_id_seq'::regclass)"))
-    op.execute(DropSequence(Sequence("posts_id_seq")))
+    op.execute("ALTER SEQUENCE posts_id_seq RENAME TO postings_id_seq")
 
     op.create_foreign_key("fk_posting_id__postings", "post_tags", "posts", ["posting_id"], ["id"])
 
