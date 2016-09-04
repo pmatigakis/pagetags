@@ -31,8 +31,7 @@ Run the database migrations
 alembic upgrade head
 ```
 
-Create a file named *settings.py* and add the following variables. In this
-example the database that will be used is Postgresql.
+Create a file named *settings.py* and add the following variables.
 
 ```python
 import logging
@@ -47,7 +46,7 @@ LOG_LEVEL = logging.DEBUG
 
 # Usage
 
-Create a used with the cli tool
+Create a user with the cli tool
 
 ```
 pagetags users create --username user1 --password user1password
@@ -152,5 +151,13 @@ Request body
     "title": "page title",
     "url": "http://www.example.com/page_1",
     "tags": ["tag1", "tag2"]
+}
+```
+
+Response
+
+```javascript
+{
+    "id": 123
 }
 ```
