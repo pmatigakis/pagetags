@@ -21,10 +21,9 @@ Download the source code and execute the setup script
 python setup.py install
 ```
 
-Edit the *alembic.ini* file and set the *sqlalchemy.url* variable to the settings
-required by the RDBMS you plan to use. Pagetags has been testen only on SQLite
-and Postgresql but it should work on any database supported by SQLAlchemy.
-You will have to create the database and a user on your RDBMS.
+You will need a Postgresql database and the user credentials for that database.
+Edit the *alembic.ini* file and set the *sqlalchemy.url* variable to the required
+settings for your database.
 
 Run the database migrations
 
