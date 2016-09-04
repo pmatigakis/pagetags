@@ -12,7 +12,8 @@ setup(
         "Flask-Login==0.3.2",
         "Flask-JWT==0.3.2",
         "Flask-RESTful==0.3.5",
-        "alembic==0.8.7"
+        "alembic==0.8.7",
+        "psycopg2==2.6.2"
     ],
     include_package_data=True,
     zip_safe=False,
