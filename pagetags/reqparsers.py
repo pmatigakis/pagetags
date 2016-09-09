@@ -8,7 +8,7 @@ post.add_argument("title", required=True, location="json",
                   type=argtypes.post_title)
 post.add_argument("url", required=True, location="json",
                   type=argtypes.post_url)
-post.add_argument("tags", required=True, action='append', location="json")
+post.add_argument("tags", required=True, type=list, location="json")
 
 
 url_query = RequestParser()
