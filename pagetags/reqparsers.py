@@ -1,9 +1,13 @@
 from flask_restful.reqparse import RequestParser
 
+from pagetags import argtypes
+
 
 post = RequestParser()
-post.add_argument("title", required=True, location="json")
-post.add_argument("url", required=True, location="json")
+post.add_argument("title", required=True, location="json",
+                  type=argtypes.post_title)
+post.add_argument("url", required=True, location="json",
+                  type=argtypes.post_url)
 post.add_argument("tags", required=True, action='append', location="json")
 
 

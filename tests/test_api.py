@@ -5,7 +5,7 @@ import urllib
 
 from pagetags.main import create_app
 from pagetags import db
-from pagetags.models import Post
+from pagetags.models import Post, Url
 
 from mock_data import load_users, load_mock_posts
 
@@ -209,6 +209,112 @@ class PostApiTests(ApiTestCase):
         response = json.loads(response.data)
 
         self.assertIsNotNone(response.get("id"))
+
+    def test_fail_to_add_post_with_empty_title(self):
+        token = self.authenticate()
+
+        posting = {
+            "title": "",
+            "url": "http://www.example.com",
+            "tags": ["tag1", "tag2"]
+        }
+
+        response = self.client.post(
+            "/api/v1/posts",
+            headers={"Authorization": "JWT %s" % token,
+                     "Content-Type": "application/json"},
+            data=json.dumps(posting)
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+        response_data = json.loads(response.data)
+
+        self.assertDictEqual(
+            response_data,
+            {u'message': {u'title': u'A title is required'}}
+        )
+
+    def test_fail_to_add_post_with_empty_url(self):
+        token = self.authenticate()
+
+        posting = {
+            "title": "post title",
+            "url": "",
+            "tags": ["tag1", "tag2"]
+        }
+
+        response = self.client.post(
+            "/api/v1/posts",
+            headers={"Authorization": "JWT %s" % token,
+                     "Content-Type": "application/json"},
+            data=json.dumps(posting)
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+        response_data = json.loads(response.data)
+
+        self.assertDictEqual(
+            response_data,
+            {u'message': {u'url': u'A url is required'}}
+        )
+
+    def test_fail_to_add_post_with_large_title(self):
+        token = self.authenticate()
+
+        large_title = "a" * (Post.TITLE_LENGTH + 1)
+
+        posting = {
+            "title": large_title,
+            "url": "http://www.example.com",
+            "tags": ["tag1", "tag2"]
+        }
+
+        response = self.client.post(
+            "/api/v1/posts",
+            headers={"Authorization": "JWT %s" % token,
+                     "Content-Type": "application/json"},
+            data=json.dumps(posting)
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+        response_data = json.loads(response.data)
+
+        self.assertDictEqual(
+            response_data,
+            {u'message': {
+                u'title': u'The title length is over the maximum allowed'}}
+        )
+
+    def test_fail_to_add_post_with_large_url(self):
+        token = self.authenticate()
+
+        large_url = "http://%s.com" % ("a" * Url.URL_LENGTH)
+
+        posting = {
+            "title": "post title",
+            "url": large_url,
+            "tags": ["tag1", "tag2"]
+        }
+
+        response = self.client.post(
+            "/api/v1/posts",
+            headers={"Authorization": "JWT %s" % token,
+                     "Content-Type": "application/json"},
+            data=json.dumps(posting)
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+        response_data = json.loads(response.data)
+
+        self.assertDictEqual(
+            response_data,
+            {u'message': {
+                u'url': u'The url length is over the maximum allowed'}}
+        )
 
 
 class UrlAPIEndpointTests(ApiTestCase):

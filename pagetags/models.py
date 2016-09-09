@@ -2,6 +2,7 @@ from datetime import datetime
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from sqlalchemy.orm import validates
 
 from pagetags import db
 
@@ -120,8 +121,10 @@ class Url(db.Model):
         db.UniqueConstraint("url", name="uq_urls__url")
     )
 
+    URL_LENGTH = 1024
+
     id = db.Column(db.Integer, nullable=False)
-    url = db.Column(db.String(1024), nullable=False)
+    url = db.Column(db.String(URL_LENGTH), nullable=False)
     added_at = db.Column(db.DateTime, nullable=False)
 
     posts = db.relationship("Post", back_populates="url")
@@ -162,6 +165,13 @@ class Url(db.Model):
                          .order_by(db.desc(Post.added_at))\
                          .all()
 
+    @validates("url")
+    def validate_url(self, key, url):
+        if len(url) == 0 or len(url) > self.URL_LENGTH:
+            raise ValueError()
+
+        return url
+
 
 class Post(db.Model):
     __tablename__ = "posts"
@@ -172,9 +182,11 @@ class Post(db.Model):
                                 name="fk_url_id__urls")
     )
 
+    TITLE_LENGTH = 256
+
     id = db.Column(db.Integer, nullable=False)
     url_id = db.Column(db.Integer, nullable=False)
-    title = db.Column(db.String(256), nullable=False)
+    title = db.Column(db.String(TITLE_LENGTH), nullable=False)
     added_at = db.Column(db.DateTime, nullable=False)
 
     url = db.relationship("Url", back_populates="posts")
@@ -213,3 +225,10 @@ class Post(db.Model):
         return cls.query\
                   .order_by(db.desc(cls.added_at))\
                   .paginate(page=page, per_page=per_page)
+
+    @validates("title")
+    def validate_title(self, key, title):
+        if len(title) == 0 or len(title) > self.TITLE_LENGTH:
+            raise ValueError()
+
+        return title

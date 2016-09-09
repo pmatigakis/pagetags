@@ -424,6 +424,16 @@ class UrlCreationTests(TestCase):
             self.assertIsNotNone(url.id)
             self.assertEqual(url.url, "http://www.example.com")
 
+    def test_fail_to_create_url_with_empty_url_field(self):
+        with self.app.app_context():
+            self.assertRaises(ValueError, Url.create, "")
+
+    def test_fail_to_create_url_with_very_large_url_field(self):
+        large_url = "http://%s.com" % ("a" * Url.URL_LENGTH)
+
+        with self.app.app_context():
+            self.assertRaises(ValueError, Url.create, large_url)
+
 
 class PostCreationTests(TestCase):
     def setUp(self):
@@ -490,6 +500,28 @@ class PostCreationTests(TestCase):
             db.session.commit()
 
             self.assertItemsEqual(post.tag_names(), ["tag1", "tag2"])
+
+    def test_fail_to_create_post_with_empty_title(self):
+        with self.app.app_context():
+            self.assertRaises(
+                ValueError,
+                Post.create,
+                "",
+                "http://www.google.com",
+                ["tag1", "tag2"]
+            )
+
+    def test_fail_to_create_post_with_large_title_field(self):
+        large_title = "a" * (Post.TITLE_LENGTH + 1)
+
+        with self.app.app_context():
+            self.assertRaises(
+                ValueError,
+                Post.create,
+                large_title,
+                "http://www.google.com",
+                ["tag1", "tag2"]
+            )
 
 
 class UrlPostRetrievalTests(TestCase):

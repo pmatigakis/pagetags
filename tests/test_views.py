@@ -3,6 +3,7 @@ from unittest import TestCase, main
 
 from pagetags.main import create_app
 from pagetags import db
+from pagetags.models import Post, Url
 
 from mock_data import load_users, load_mock_posts
 
@@ -148,6 +149,102 @@ class NewUrlViewTests(WebTestCase):
         self.assertIn("http://www.example.com</a>", response.data)
         self.assertIn("tag1", response.data)
         self.assertIn("tag2", response.data)
+
+        self.logout()
+
+    def test_fail_to_add_post_with_empty_title(self):
+        self.login()
+
+        request_data = {
+            "title": "",
+            "url": "http://www.example.com",
+            "tags": "tag1, tag2"
+        }
+
+        response = self.client.post("/new_url",
+                                    data=request_data,
+                                    follow_redirects=True)
+
+        self.assertIn("<title>PageTags - New URL</title>", response.data)
+        self.assertIn("This field is required", response.data)
+
+        with self.app.app_context():
+            self.assertEqual(db.session.query(Url).count(), 0)
+            self.assertEqual(db.session.query(Post).count(), 0)
+
+        self.logout()
+
+    def test_fail_to_add_post_with_empty_url(self):
+        self.login()
+
+        request_data = {
+            "title": "post title",
+            "url": "",
+            "tags": "tag1, tag2"
+        }
+
+        response = self.client.post("/new_url",
+                                    data=request_data,
+                                    follow_redirects=True)
+
+        self.assertIn("<title>PageTags - New URL</title>", response.data)
+        self.assertIn("This field is required", response.data)
+
+        with self.app.app_context():
+            self.assertEqual(db.session.query(Url).count(), 0)
+            self.assertEqual(db.session.query(Post).count(), 0)
+
+        self.logout()
+
+    def test_fail_to_add_post_with_large_title(self):
+        self.login()
+
+        large_title = "a" * (Post.TITLE_LENGTH + 1)
+
+        request_data = {
+            "title": large_title,
+            "url": "http://www.example.com",
+            "tags": "tag1, tag2"
+        }
+
+        response = self.client.post("/new_url",
+                                    data=request_data,
+                                    follow_redirects=True)
+
+        self.assertIn("<title>PageTags - New URL</title>", response.data)
+
+        error_message = "Field cannot be longer than %d characters"
+        self.assertIn(error_message % Post.TITLE_LENGTH, response.data)
+
+        with self.app.app_context():
+            self.assertEqual(db.session.query(Url).count(), 0)
+            self.assertEqual(db.session.query(Post).count(), 0)
+
+        self.logout()
+
+    def test_fail_to_add_post_with_large_url(self):
+        self.login()
+
+        large_url = "http://%s.com" % ("a" * Url.URL_LENGTH)
+
+        request_data = {
+            "title": "post title",
+            "url": large_url,
+            "tags": "tag1, tag2"
+        }
+
+        response = self.client.post("/new_url",
+                                    data=request_data,
+                                    follow_redirects=True)
+
+        self.assertIn("<title>PageTags - New URL</title>", response.data)
+
+        error_message = "Field cannot be longer than %d characters"
+        self.assertIn(error_message % Url.URL_LENGTH, response.data)
+
+        with self.app.app_context():
+            self.assertEqual(db.session.query(Url).count(), 0)
+            self.assertEqual(db.session.query(Post).count(), 0)
 
         self.logout()
 
