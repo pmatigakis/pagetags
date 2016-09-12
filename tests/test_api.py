@@ -354,5 +354,143 @@ class UrlAPIEndpointTests(ApiTestCase):
         self.assertIsNotNone(response[1]["added_at"])
 
 
+class APIPostRetrievalTests(ApiTestCase):
+    def setUp(self):
+        super(APIPostRetrievalTests, self).setUp()
+
+        with self.app.app_context():
+            load_mock_posts(db)
+
+    def test_get_latest_posts(self):
+        token = self.authenticate()
+
+        response = self.client.get(
+            "/api/v1/posts",
+            headers={"Authorization": "JWT %s" % token}
+        )
+
+        data = json.loads(response.data)
+
+        self.assertEqual(data["page"], 1)
+        self.assertEqual(data["per_page"], 10)
+        self.assertFalse(data["has_more"])
+
+        self.assertEqual(len(data["posts"]), 4)
+
+        self.assertEqual(data["posts"][0]["id"], 4)
+        self.assertEqual(data["posts"][0]["title"], "page 4")
+
+        self.assertEqual(
+            data["posts"][0]["url"], "http://www.example.com/page_4")
+
+        self.assertItemsEqual(data["posts"][0]["tags"], ["tag4", "tag5"])
+        self.assertIsNotNone(data["posts"][0]["added_at"])
+
+        self.assertEqual(data["posts"][1]["id"], 3)
+        self.assertEqual(data["posts"][1]["title"], "page 3")
+
+        self.assertEqual(
+            data["posts"][1]["url"], "http://www.example.com/page_1")
+
+        self.assertItemsEqual(data["posts"][1]["tags"], ["tag1", "tag3"])
+        self.assertIsNotNone(data["posts"][1]["added_at"])
+
+        self.assertEqual(data["posts"][2]["id"], 2)
+        self.assertEqual(data["posts"][2]["title"], "page 2")
+
+        self.assertEqual(
+            data["posts"][2]["url"], "http://www.example.com/page_2")
+
+        self.assertItemsEqual(data["posts"][2]["tags"], ["tag1", "tag3"])
+        self.assertIsNotNone(data["posts"][2]["added_at"])
+
+        self.assertEqual(data["posts"][3]["id"], 1)
+        self.assertEqual(data["posts"][3]["title"], "page 1")
+
+        self.assertEqual(
+            data["posts"][3]["url"], "http://www.example.com/page_1")
+
+        self.assertItemsEqual(data["posts"][3]["tags"], ["tag1", "tag2"])
+        self.assertIsNotNone(data["posts"][3]["added_at"])
+
+    def test_get_first_page_of_posts(self):
+        token = self.authenticate()
+
+        response = self.client.get(
+            "/api/v1/posts?%s" % urllib.urlencode({"page": 1, "per_page": 2}),
+            headers={"Authorization": "JWT %s" % token}
+        )
+
+        data = json.loads(response.data)
+
+        self.assertEqual(data["page"], 1)
+        self.assertEqual(data["per_page"], 2)
+        self.assertTrue(data["has_more"])
+
+        self.assertEqual(len(data["posts"]), 2)
+
+        self.assertEqual(data["posts"][0]["id"], 4)
+        self.assertEqual(data["posts"][0]["title"], "page 4")
+
+        self.assertEqual(
+            data["posts"][0]["url"], "http://www.example.com/page_4")
+
+        self.assertItemsEqual(data["posts"][0]["tags"], ["tag4", "tag5"])
+        self.assertIsNotNone(data["posts"][0]["added_at"])
+
+        self.assertEqual(data["posts"][1]["id"], 3)
+        self.assertEqual(data["posts"][1]["title"], "page 3")
+
+        self.assertEqual(
+            data["posts"][1]["url"], "http://www.example.com/page_1")
+
+        self.assertItemsEqual(data["posts"][1]["tags"], ["tag1", "tag3"])
+        self.assertIsNotNone(data["posts"][1]["added_at"])
+
+    def test_get_second_page_of_posts(self):
+        token = self.authenticate()
+
+        response = self.client.get(
+            "/api/v1/posts?%s" % urllib.urlencode({"page": 2, "per_page": 2}),
+            headers={"Authorization": "JWT %s" % token}
+        )
+
+        data = json.loads(response.data)
+
+        self.assertEqual(data["page"], 2)
+        self.assertEqual(data["per_page"], 2)
+        self.assertFalse(data["has_more"])
+
+        self.assertEqual(len(data["posts"]), 2)
+
+        self.assertEqual(data["posts"][0]["id"], 2)
+        self.assertEqual(data["posts"][0]["title"], "page 2")
+
+        self.assertEqual(
+            data["posts"][0]["url"], "http://www.example.com/page_2")
+
+        self.assertItemsEqual(data["posts"][0]["tags"], ["tag1", "tag3"])
+        self.assertIsNotNone(data["posts"][0]["added_at"])
+
+        self.assertEqual(data["posts"][1]["id"], 1)
+        self.assertEqual(data["posts"][1]["title"], "page 1")
+
+        self.assertEqual(
+            data["posts"][1]["url"], "http://www.example.com/page_1")
+
+        self.assertItemsEqual(data["posts"][1]["tags"], ["tag1", "tag2"])
+        self.assertIsNotNone(data["posts"][1]["added_at"])
+
+    def test_get_error_when_requesting_page_that_does_not_exist(self):
+        token = self.authenticate()
+
+        response = self.client.get(
+            "/api/v1/posts?%s" % urllib.urlencode({"page": 3, "per_page": 2}),
+            headers={"Authorization": "JWT %s" % token}
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+
 if __name__ == "__main__":
     main()

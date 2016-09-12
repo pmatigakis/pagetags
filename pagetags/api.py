@@ -47,6 +47,31 @@ class PostsResource(Resource):
 
         return {"id": post.id}
 
+    @jwt_required()
+    def get(self):
+        args = reqparsers.posts.parse_args()
+
+        paginator = models.Post.get_latest_by_page(
+            args.page, per_page=args.per_page)
+
+        posts = [
+            {
+                "id": post.id,
+                "title": post.title,
+                "url": post.url.url,
+                "tags": [tag.name for tag in post.tags],
+                "added_at": post.added_at.strftime("%Y/%m/%d %H:%M:%S")
+            }
+            for post in paginator.items
+        ]
+
+        return {
+            "posts": posts,
+            "has_more": paginator.has_next,
+            "page": args.page,
+            "per_page": args.per_page
+        }
+
 
 class UrlResource(Resource):
     @jwt_required()
