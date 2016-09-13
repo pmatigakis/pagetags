@@ -585,6 +585,97 @@ class UrlPostRetrievalTests(TestCase):
             self.assertEqual(posts[0].title, "page 1 test 2")
             self.assertEqual(posts[1].title, "page 1 test 1")
 
+    def test_retrieve_url_posts_by_page(self):
+        with self.app.app_context():
+            url = Url.create("http://www.example.com/page_1")
+            Url.create("http://www.example.com/page_2")
+
+            db.session.commit()
+
+            Post.create("page 1 test 1", "http://www.example.com/page_1",
+                        ["tag1", "tag2"])
+
+            db.session.commit()
+
+            # sleep for a while so that the next posting has a different
+            # added_at datetime
+            time.sleep(0.1)
+
+            Post.create("page 1 test 2", "http://www.example.com/page_1",
+                        ["tag1", "tag3"])
+
+            db.session.commit()
+
+            # sleep for a while so that the next posting has a different
+            # added_at datetime
+            time.sleep(0.1)
+
+            Post.create("page 1 test 3", "http://www.example.com/page_1",
+                        ["tag1", "tag4"])
+
+            db.session.commit()
+
+            # sleep for a while so that the next posting has a different
+            # added_at datetime
+            time.sleep(0.1)
+
+            Post.create("page 2 test 1", "http://www.example.com/page_2",
+                        ["tag1", "tag5"])
+
+            db.session.commit()
+
+            paginator = url.get_posts_by_page(1, per_page=2)
+
+            self.assertEqual(len(paginator.items), 2)
+
+            self.assertEqual(paginator.items[0].title, "page 1 test 3")
+            self.assertEqual(paginator.items[1].title, "page 1 test 2")
+
+    def test_retrieve_second_page_of_url_posts(self):
+        with self.app.app_context():
+            url = Url.create("http://www.example.com/page_1")
+            Url.create("http://www.example.com/page_2")
+
+            db.session.commit()
+
+            Post.create("page 1 test 1", "http://www.example.com/page_1",
+                        ["tag1", "tag2"])
+
+            db.session.commit()
+
+            # sleep for a while so that the next posting has a different
+            # added_at datetime
+            time.sleep(0.1)
+
+            Post.create("page 1 test 2", "http://www.example.com/page_1",
+                        ["tag1", "tag3"])
+
+            db.session.commit()
+
+            # sleep for a while so that the next posting has a different
+            # added_at datetime
+            time.sleep(0.1)
+
+            Post.create("page 1 test 3", "http://www.example.com/page_1",
+                        ["tag1", "tag4"])
+
+            db.session.commit()
+
+            # sleep for a while so that the next posting has a different
+            # added_at datetime
+            time.sleep(0.1)
+
+            Post.create("page 2 test 1", "http://www.example.com/page_2",
+                        ["tag1", "tag5"])
+
+            db.session.commit()
+
+            paginator = url.get_posts_by_page(2, per_page=2)
+
+            self.assertEqual(len(paginator.items), 1)
+
+            self.assertEqual(paginator.items[0].title, "page 1 test 1")
+
 
 class PostPaginationTests(TestCase):
     def setUp(self):

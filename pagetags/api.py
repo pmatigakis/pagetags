@@ -88,7 +88,11 @@ class UrlResource(Resource):
     def get(self):
         args = reqparsers.url_query.parse_args()
 
-        return [
+        url = models.Url.get_by_url(args.url)
+
+        paginator = url.get_posts_by_page(args.page, args.per_page)
+
+        posts = [
             {
                 "id": post.id,
                 "title": post.title,
@@ -96,5 +100,12 @@ class UrlResource(Resource):
                 "tags": post.tag_names(),
                 "added_at": post.added_at.strftime("%Y/%m/%d %H:%M:%S")
             }
-            for post in models.Url.get_posts(args.url)
+            for post in paginator.items
         ]
+
+        return {
+            "posts": posts,
+            "has_more": paginator.has_next,
+            "page": args.page,
+            "per_page": args.per_page
+        }

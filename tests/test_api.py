@@ -384,19 +384,76 @@ class UrlAPIEndpointTests(ApiTestCase):
 
         response = json.loads(response.data)
 
-        self.assertEqual(len(response), 2)
+        self.assertFalse(response["has_more"])
+        self.assertEqual(response["page"], 1)
+        self.assertEqual(response["per_page"], 10)
+        self.assertEqual(len(response["posts"]), 2)
 
-        self.assertEqual(response[0]["id"], 3)
-        self.assertEqual(response[0]["title"], "page 3")
-        self.assertEqual(response[0]["url"], url)
-        self.assertItemsEqual(response[0]["tags"], ["tag1", "tag3"])
-        self.assertIsNotNone(response[0]["added_at"])
+        self.assertEqual(response["posts"][0]["id"], 3)
+        self.assertEqual(response["posts"][0]["title"], "page 3")
+        self.assertEqual(response["posts"][0]["url"], url)
+        self.assertItemsEqual(response["posts"][0]["tags"], ["tag1", "tag3"])
+        self.assertIsNotNone(response["posts"][0]["added_at"])
 
-        self.assertEqual(response[1]["id"], 1)
-        self.assertEqual(response[1]["title"], "page 1")
-        self.assertEqual(response[1]["url"], url)
-        self.assertItemsEqual(response[1]["tags"], ["tag1", "tag2"])
-        self.assertIsNotNone(response[1]["added_at"])
+        self.assertEqual(response["posts"][1]["id"], 1)
+        self.assertEqual(response["posts"][1]["title"], "page 1")
+        self.assertEqual(response["posts"][1]["url"], url)
+        self.assertItemsEqual(response["posts"][1]["tags"], ["tag1", "tag2"])
+        self.assertIsNotNone(response["posts"][1]["added_at"])
+
+    def test_retrieve_url_post_by_page(self):
+        token = self.authenticate()
+
+        url = "http://www.example.com/page_1"
+
+        response = self.client.get(
+            "/api/v1/url?%s" % urllib.urlencode(
+                {"url": url, "page": 1, "per_page": 1}),
+            headers={"Authorization": "JWT %s" % token,
+                     "Content-Type": "application/json"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        response = json.loads(response.data)
+
+        self.assertTrue(response["has_more"])
+        self.assertEqual(response["page"], 1)
+        self.assertEqual(response["per_page"], 1)
+        self.assertEqual(len(response["posts"]), 1)
+
+        self.assertEqual(response["posts"][0]["id"], 3)
+        self.assertEqual(response["posts"][0]["title"], "page 3")
+        self.assertEqual(response["posts"][0]["url"], url)
+        self.assertItemsEqual(response["posts"][0]["tags"], ["tag1", "tag3"])
+        self.assertIsNotNone(response["posts"][0]["added_at"])
+
+    def test_retrieve_second_page_of_url_posts(self):
+        token = self.authenticate()
+
+        url = "http://www.example.com/page_1"
+
+        response = self.client.get(
+            "/api/v1/url?%s" % urllib.urlencode(
+                {"url": url, "page": 2, "per_page": 1}),
+            headers={"Authorization": "JWT %s" % token,
+                     "Content-Type": "application/json"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        response = json.loads(response.data)
+
+        self.assertFalse(response["has_more"])
+        self.assertEqual(response["page"], 2)
+        self.assertEqual(response["per_page"], 1)
+        self.assertEqual(len(response["posts"]), 1)
+
+        self.assertEqual(response["posts"][0]["id"], 1)
+        self.assertEqual(response["posts"][0]["title"], "page 1")
+        self.assertEqual(response["posts"][0]["url"], url)
+        self.assertItemsEqual(response["posts"][0]["tags"], ["tag1", "tag2"])
+        self.assertIsNotNone(response["posts"][0]["added_at"])
 
 
 class APIPostRetrievalTests(ApiTestCase):

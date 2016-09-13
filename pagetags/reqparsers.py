@@ -13,6 +13,8 @@ post.add_argument("tags", required=True, type=list, location="json")
 
 url_query = RequestParser()
 url_query.add_argument("url", required=True, location="args")
+url_query.add_argument("page", default=1, type=int, location="args")
+url_query.add_argument("per_page", default=10, type=int, location="args")
 
 
 posts = RequestParser()

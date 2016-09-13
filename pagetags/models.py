@@ -165,6 +165,12 @@ class Url(db.Model):
                          .order_by(db.desc(Post.added_at))\
                          .all()
 
+    def get_posts_by_page(self, page, per_page=10):
+        return Post.query\
+                   .filter(Post.url == self)\
+                   .order_by(db.desc(Post.added_at))\
+                   .paginate(page=page, per_page=per_page)
+
     @validates("url")
     def validate_url(self, key, url):
         if len(url) == 0 or len(url) > self.URL_LENGTH:
