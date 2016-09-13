@@ -22,3 +22,4 @@ posts.add_argument("per_page", default=10, type=int, location="args")
 
 tag_posts = RequestParser()
 tag_posts.add_argument("page", default=1, type=int, location="args")
+tag_posts.add_argument("per_page", default=10, type=int, location="args")

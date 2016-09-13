@@ -98,56 +98,101 @@ class TagsTest(ApiTestCase):
 
         response = json.loads(response.data)
 
-        self.assertEqual(len(response), 3)
+        self.assertEqual(response["page"], 1)
+        self.assertEqual(response["per_page"], 10)
+        self.assertEqual(len(response["posts"]), 3)
+        self.assertFalse(response["has_more"])
 
-        self.assertDictEqual(
-            response[0],
-            {
-                "id": 1,
-                "title": "page 1",
-                "url": "http://www.example.com/page_1",
-                "tags": ["tag1", "tag2"]
-            }
-        )
+        self.assertEqual(response["posts"][0]["id"], 3)
+        self.assertEqual(response["posts"][0]["title"], "page 3")
+        self.assertEqual(
+            response["posts"][0]["url"], "http://www.example.com/page_1")
+        self.assertItemsEqual(response["posts"][0]["tags"], ["tag1", "tag3"])
+        self.assertIsNotNone(response["posts"][0]["added_at"])
 
-        self.assertDictEqual(
-            response[1],
-            {
-                "id": 2,
-                "title": "page 2",
-                "url": "http://www.example.com/page_2",
-                "tags": ["tag1", "tag3"]
-            }
-        )
+        self.assertEqual(response["posts"][1]["id"], 2)
+        self.assertEqual(response["posts"][1]["title"], "page 2")
+        self.assertEqual(
+            response["posts"][1]["url"], "http://www.example.com/page_2")
+        self.assertItemsEqual(response["posts"][1]["tags"], ["tag1", "tag3"])
+        self.assertIsNotNone(response["posts"][1]["added_at"])
 
-        self.assertDictEqual(
-            response[2],
-            {
-                "id": 3,
-                "title": "page 3",
-                "url": "http://www.example.com/page_1",
-                "tags": ["tag1", "tag3"]
-            }
-        )
+        self.assertEqual(response["posts"][2]["id"], 1)
+        self.assertEqual(response["posts"][2]["title"], "page 1")
+        self.assertEqual(
+            response["posts"][2]["url"], "http://www.example.com/page_1")
+        self.assertItemsEqual(response["posts"][2]["tags"], ["tag1", "tag2"])
+        self.assertIsNotNone(response["posts"][2]["added_at"])
+
+    def test_get_tag_posts_by_page(self):
+        token = self.authenticate()
+
+        endpoint_url = "/api/v1/tag/tag1?%s" % urllib.urlencode(
+            {"page": 1, "per_page": 2})
 
         response = self.client.get(
-            "/api/v1/tag/tag2",
+            endpoint_url,
             headers={"Authorization": "JWT %s" % token}
         )
 
         response = json.loads(response.data)
 
-        self.assertEqual(len(response), 1)
+        self.assertEqual(response["page"], 1)
+        self.assertEqual(response["per_page"], 2)
+        self.assertEqual(len(response["posts"]), 2)
+        self.assertTrue(response["has_more"])
 
-        self.assertDictEqual(
-            response[0],
-            {
-                "id": 1,
-                "title": "page 1",
-                "url": "http://www.example.com/page_1",
-                "tags": ["tag1", "tag2"]
-            }
+        self.assertEqual(response["posts"][0]["id"], 3)
+        self.assertEqual(response["posts"][0]["title"], "page 3")
+        self.assertEqual(
+            response["posts"][0]["url"], "http://www.example.com/page_1")
+        self.assertItemsEqual(response["posts"][0]["tags"], ["tag1", "tag3"])
+        self.assertIsNotNone(response["posts"][0]["added_at"])
+
+        self.assertEqual(response["posts"][1]["id"], 2)
+        self.assertEqual(response["posts"][1]["title"], "page 2")
+        self.assertEqual(
+            response["posts"][1]["url"], "http://www.example.com/page_2")
+        self.assertItemsEqual(response["posts"][1]["tags"], ["tag1", "tag3"])
+        self.assertIsNotNone(response["posts"][1]["added_at"])
+
+    def test_get_second_page_of_tag_posts(self):
+        token = self.authenticate()
+
+        endpoint_url = "/api/v1/tag/tag1?%s" % urllib.urlencode(
+            {"page": 2, "per_page": 2})
+
+        response = self.client.get(
+            endpoint_url,
+            headers={"Authorization": "JWT %s" % token}
         )
+
+        response = json.loads(response.data)
+
+        self.assertEqual(response["page"], 2)
+        self.assertEqual(response["per_page"], 2)
+        self.assertEqual(len(response["posts"]), 1)
+        self.assertFalse(response["has_more"])
+
+        self.assertEqual(response["posts"][0]["id"], 1)
+        self.assertEqual(response["posts"][0]["title"], "page 1")
+        self.assertEqual(
+            response["posts"][0]["url"], "http://www.example.com/page_1")
+        self.assertItemsEqual(response["posts"][0]["tags"], ["tag1", "tag2"])
+        self.assertIsNotNone(response["posts"][0]["added_at"])
+
+    def test_fail_to_get_page_of_tag_posts_that_does_not_exist(self):
+        token = self.authenticate()
+
+        endpoint_url = "/api/v1/tag/tag1?%s" % urllib.urlencode(
+            {"page": 3, "per_page": 2})
+
+        response = self.client.get(
+            endpoint_url,
+            headers={"Authorization": "JWT %s" % token}
+        )
+
+        self.assertEqual(response.status_code, 404)
 
 
 class FailtToAccessApPIEndpointWithouTokenTests(ApiTestCase):

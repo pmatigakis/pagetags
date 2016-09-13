@@ -18,17 +18,27 @@ class TagPostsResource(Resource):
     def get(self, tag):
         tag = models.Tag.get_by_name(tag)
 
-        posts = tag.get_posts()
+        args = reqparsers.tag_posts.parse_args()
 
-        return [
+        paginator = tag.get_posts_by_page(args.page, args.per_page)
+
+        posts = [
             {
                 "id": post.id,
                 "title": post.title,
                 "url": post.url.url,
-                "tags": post.tag_names()
+                "tags": post.tag_names(),
+                "added_at": post.added_at.strftime("%Y/%m/%d %H:%M:%S")
             }
-            for post in posts
+            for post in paginator.items
         ]
+
+        return {
+            "posts": posts,
+            "has_more": paginator.has_next,
+            "page": args.page,
+            "per_page": args.per_page
+        }
 
 
 class PostsResource(Resource):
