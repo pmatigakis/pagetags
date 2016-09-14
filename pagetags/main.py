@@ -64,6 +64,7 @@ def create_app(settings_file, environment_type=None):
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.user_callback = load_user
+    login_manager.login_view = "login"
 
     app.add_url_rule("/", view_func=index)
     app.add_url_rule("/new_url", view_func=new_url, methods=["GET", "POST"])

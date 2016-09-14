@@ -125,6 +125,14 @@ class LoginTests(WebTestCase):
 
         self.assertIn("<title>PageTags - Login</title>", response.data)
 
+    def test_redirect_to_login_page_when_not_logged_in(self):
+        client = self.app.test_client()
+
+        response = client.get("/", follow_redirects=True)
+
+        self.assertIn("<title>PageTags - Login</title>", response.data)
+        self.assertIn("<h1>Login</h1>", response.data)
+
 
 class NewUrlViewTests(WebTestCase):
     def test_new_url(self):
