@@ -105,39 +105,64 @@ Response
 ["tag1", "tag2", "tag3"]
 ```
 
-### Get /api/v1/tag/\<tag\>
+### Get /api/v1/tag/\<tag\>[?page=\<page\>]
 
-Returns the postings for this tag
+Returns the posts for this tag
 
 Response
 
 ```javascript
-[
-    {
-        "id": 123,
-        "title": "post title",
-        "url": "http://www.example.com/page_1",
-        "tags": ["tag1", "tag2"]
-    }
-]
+{
+    "has_more": false,
+    "page": 1,
+    "per_page": 10,
+    "posts": [
+        {
+            "id": 123,
+            "title": "post title",
+            "url": "http://www.example.com/page_1",
+            "tags": ["tag1", "tag2"],
+            "added_at": "2016/03/21 12:20:00"
+        },
+        {
+            "id": 122,
+            "title": "post title",
+            "url": "http://www.example.com/page_2",
+            "tags": ["tag1", "tag3"],
+            "added_at": "2016/03/21 11:00:00"
+        },
+    ] 
+}
 ```
 
-### Get /api/v1/url/url=\<url\>
+### Get /api/v1/url/url=\<url\>[?page=\<page\>]
 
-Returns the postings for this url
+Returns the posts for this url
 
 Response
 
 ```javascript
-[
-    {
-        "id": 123,
-        "title": "post title",
-        "url": "http://www.example.com/page_1",
-        "tags": ["tag1", "tag2"],
-        "added_at": "2016/01/01 16:00:00"
-    }
-]
+{
+    "has_more": false,
+    "page": 1,
+    "per_page": 10,
+    "posts": [
+        {
+            "id": 123,
+            "title": "post title",
+            "url": "http://www.example.com/page_1",
+            "tags": ["tag1", "tag2"],
+            "added_at": "2016/03/21 12:20:00"
+        },
+        {
+            "id": 122,
+            "title": "post title",
+            "url": "http://www.example.com/page_2",
+            "tags": ["tag1", "tag3"],
+            "added_at": "2016/03/21 11:00:00"
+        },
+    ] 
+}
 ```
 
 ### POST /api/v1/posts
@@ -159,5 +184,35 @@ Response
 ```javascript
 {
     "id": 123
+}
+```
+
+### GET /api/v1/posts[?page=\<page\>]
+
+Get the latest posts
+
+Response
+
+```javascript
+{
+    "has_more": false,
+    "page": 1,
+    "per_page": 10,
+    "posts": [
+        {
+            "id": 123,
+            "title": "post title",
+            "url": "http://www.example.com/page_1",
+            "tags": ["tag1", "tag2"],
+            "added_at": "2016/03/21 12:20:00"
+        },
+        {
+            "id": 122,
+            "title": "post title",
+            "url": "http://www.example.com/page_2",
+            "tags": ["tag1", "tag3"],
+            "added_at": "2016/03/21 11:00:00"
+        },
+    ] 
 }
 ```
