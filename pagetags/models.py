@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import uuid4
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -28,12 +29,14 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, nullable=False)
     username = db.Column(db.String(20), nullable=False)
     password = db.Column(db.String(128), nullable=False)
+    jti = db.Column(db.String(32), nullable=False)
 
     @classmethod
     def create(cls, username, password):
         user = cls(
             username=username,
-            password=generate_password_hash(password)
+            password=generate_password_hash(password),
+            jti=uuid4().hex
         )
 
         db.session.add(user)
@@ -54,6 +57,7 @@ class User(UserMixin, db.Model):
 
     def change_password(self, password):
         self.password = generate_password_hash(password)
+        self.jti = uuid4().hex
 
     @classmethod
     def authenticate(cls, username, password):
@@ -65,6 +69,12 @@ class User(UserMixin, db.Model):
             return user
 
         return None
+
+    @classmethod
+    def authenticate_using_jti(cls, user_id, jti):
+        return db.session.query(User)\
+                         .filter_by(id=user_id, jti=jti)\
+                         .one_or_none()
 
 
 class Tag(db.Model):

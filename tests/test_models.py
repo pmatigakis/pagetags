@@ -50,6 +50,7 @@ class UserCreationModelTests(TestCase):
             self.assertIsNone(user.id)
             self.assertEqual(user.username, "user1")
             self.assertTrue(check_password_hash(user.password, "password"))
+            self.assertIsNotNone(user.jti)
 
             db.session.commit()
 
@@ -239,9 +240,11 @@ class UserAuthenticationTests(TestCase):
 
             self.assertEqual(db.session.query(User).count(), 0)
 
-            User.create("user1", "password")
+            user = User.create("user1", "password")
 
             db.session.commit()
+            self.user_id = user.id
+            self.jti = user.jti
 
             self.assertEqual(db.session.query(User).count(), 1)
 
@@ -267,6 +270,26 @@ class UserAuthenticationTests(TestCase):
     def test_fail_to_authenticate_unknown_user(self):
         with self.app.app_context():
             self.assertFalse(User.authenticate("user2", "password"))
+
+    def test_authenticate_using_jti(self):
+        with self.app.app_context():
+            user = User.authenticate_using_jti(self.user_id, self.jti)
+
+            self.assertIsNotNone(user)
+            self.assertEqual(user.id, self.user_id)
+            self.assertEqual(user.jti, self.jti)
+
+    def test_fail_to_authenticate_using_invalid_jti(self):
+        with self.app.app_context():
+            user = User.authenticate_using_jti(self.user_id, "invalid-jti")
+
+            self.assertIsNone(user)
+
+    def test_fail_to_authenticate_using_invalid_user_id(self):
+        with self.app.app_context():
+            user = User.authenticate_using_jti(1234, self.jti)
+
+            self.assertIsNone(user)
 
 
 class TagCreationTests(TestCase):
