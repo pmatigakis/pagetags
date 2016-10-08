@@ -1,48 +1,15 @@
-import os
-from unittest import TestCase, main
-import time
+from unittest import main
 
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from werkzeug.security import check_password_hash
-from pagetags.main import create_app
 from pagetags.models import User, Tag, Post, Url
 from pagetags import db
 
-from mock_data import load_mock_posts
+from common import PagetagsTest, PagetagsTestWithMockData
 
 
-class UserCreationModelTests(TestCase):
-    def setUp(self):
-        settings_file = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "settings.py")
-
-        self.db_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "test_pagetags.db")
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
-        self.app = create_app(settings_file, "testing")
-
-        with self.app.app_context():
-            db.create_all()
-
-            self.assertEqual(db.session.query(User).count(), 0)
-
-    def tearDown(self):
-        with self.app.app_context():
-            db.session.remove()
-            db.drop_all()
-            db.get_engine(self.app).dispose()
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
+class UserCreationModelTests(PagetagsTest):
     def test_create_user(self):
         with self.app.app_context():
             user = User.create("user1", "password")
@@ -52,7 +19,11 @@ class UserCreationModelTests(TestCase):
             self.assertTrue(check_password_hash(user.password, "password"))
             self.assertIsNotNone(user.jti)
 
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to commit transaction")
 
             self.assertIsNotNone(user.id)
 
@@ -60,50 +31,18 @@ class UserCreationModelTests(TestCase):
         with self.app.app_context():
             User.create("user1", "password")
 
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to commit transaction")
 
             User.create("user1", "password")
 
             self.assertRaises(IntegrityError, db.session.commit)
 
 
-class UserRetrievalTests(TestCase):
-    def setUp(self):
-        settings_file = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "settings.py")
-
-        self.db_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "test_pagetags.db")
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
-        self.app = create_app(settings_file, "testing")
-
-        with self.app.app_context():
-            db.create_all()
-
-            self.assertEqual(db.session.query(User).count(), 0)
-
-            User.create("user1", "password")
-
-            db.session.commit()
-
-            self.assertEqual(db.session.query(User).count(), 1)
-
-    def tearDown(self):
-        with self.app.app_context():
-            db.session.remove()
-            db.drop_all()
-            db.get_engine(self.app).dispose()
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
+class UserRetrievalTests(PagetagsTestWithMockData):
     def test_get_user_by_username(self):
         with self.app.app_context():
             user = User.get_by_username("user1")
@@ -120,43 +59,7 @@ class UserRetrievalTests(TestCase):
             self.assertIsNone(user)
 
 
-class UserDeletionTests(TestCase):
-    def setUp(self):
-        settings_file = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "settings.py")
-
-        self.db_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "test_pagetags.db")
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
-        self.app = create_app(settings_file, "testing")
-
-        with self.app.app_context():
-            db.create_all()
-
-            self.assertEqual(db.session.query(User).count(), 0)
-
-            User.create("user1", "password")
-
-            db.session.commit()
-
-            self.assertEqual(db.session.query(User).count(), 1)
-
-    def tearDown(self):
-        with self.app.app_context():
-            db.session.remove()
-            db.drop_all()
-            db.get_engine(self.app).dispose()
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
+class UserDeletionTests(PagetagsTestWithMockData):
     def test_delete_user(self):
         with self.app.app_context():
             user = User.delete("user1")
@@ -165,100 +68,34 @@ class UserDeletionTests(TestCase):
             self.assertIsNotNone(user.id)
             self.assertEqual(user.username, "user1")
 
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to commit transaction")
 
             self.assertEqual(db.session.query(User).count(), 0)
 
 
-class UserPasswordTests(TestCase):
-    def setUp(self):
-        settings_file = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "settings.py")
-
-        self.db_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "test_pagetags.db")
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
-        self.app = create_app(settings_file, "testing")
-
-        with self.app.app_context():
-            db.create_all()
-
-            self.assertEqual(db.session.query(User).count(), 0)
-
-            User.create("user1", "password")
-
-            db.session.commit()
-
-            self.assertEqual(db.session.query(User).count(), 1)
-
-    def tearDown(self):
-        with self.app.app_context():
-            db.session.remove()
-            db.drop_all()
-            db.get_engine(self.app).dispose()
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
+class UserPasswordTests(PagetagsTestWithMockData):
     def test_change_user_password(self):
         with self.app.app_context():
             user = User.get_by_username("user1")
 
             user.change_password("password1")
 
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to commit transaction")
 
             user = User.get_by_username("user1")
 
             self.assertTrue(check_password_hash(user.password, "password1"))
 
 
-class UserAuthenticationTests(TestCase):
-    def setUp(self):
-        settings_file = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "settings.py")
-
-        self.db_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "test_pagetags.db")
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
-        self.app = create_app(settings_file, "testing")
-
-        with self.app.app_context():
-            db.create_all()
-
-            self.assertEqual(db.session.query(User).count(), 0)
-
-            user = User.create("user1", "password")
-
-            db.session.commit()
-            self.user_id = user.id
-            self.jti = user.jti
-
-            self.assertEqual(db.session.query(User).count(), 1)
-
-    def tearDown(self):
-        with self.app.app_context():
-            db.session.remove()
-            db.drop_all()
-            db.get_engine(self.app).dispose()
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
+class UserAuthenticationTests(PagetagsTestWithMockData):
     def test_authenticate(self):
         with self.app.app_context():
             self.assertTrue(User.authenticate("user1", "password"))
@@ -273,56 +110,28 @@ class UserAuthenticationTests(TestCase):
 
     def test_authenticate_using_jti(self):
         with self.app.app_context():
-            user = User.authenticate_using_jti(self.user_id, self.jti)
+            user = User.authenticate_using_jti(
+                self.test_user_id, self.test_user_jti)
 
             self.assertIsNotNone(user)
-            self.assertEqual(user.id, self.user_id)
-            self.assertEqual(user.jti, self.jti)
+            self.assertEqual(user.id, self.test_user_id)
+            self.assertEqual(user.jti, self.test_user_jti)
 
     def test_fail_to_authenticate_using_invalid_jti(self):
         with self.app.app_context():
-            user = User.authenticate_using_jti(self.user_id, "invalid-jti")
+            user = User.authenticate_using_jti(
+                self.test_user_id, "invalid-jti")
 
             self.assertIsNone(user)
 
     def test_fail_to_authenticate_using_invalid_user_id(self):
         with self.app.app_context():
-            user = User.authenticate_using_jti(1234, self.jti)
+            user = User.authenticate_using_jti(1234, self.test_user_jti)
 
             self.assertIsNone(user)
 
 
-class TagCreationTests(TestCase):
-    def setUp(self):
-        settings_file = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "settings.py")
-
-        self.db_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "test_pagetags.db")
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
-        self.app = create_app(settings_file, "testing")
-
-        with self.app.app_context():
-            db.create_all()
-
-            self.assertEqual(db.session.query(Tag).count(), 0)
-
-    def tearDown(self):
-        with self.app.app_context():
-            db.session.remove()
-            db.drop_all()
-            db.get_engine(self.app).dispose()
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
+class TagCreationTests(PagetagsTest):
     def test_create_tag(self):
         with self.app.app_context():
             tag = Tag.create("tag1")
@@ -331,7 +140,11 @@ class TagCreationTests(TestCase):
             self.assertIsNone(tag.id)
             self.assertEqual(tag.name, "tag1")
 
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to commit transaction")
 
             self.assertIsNotNone(tag.id)
 
@@ -339,7 +152,11 @@ class TagCreationTests(TestCase):
         with self.app.app_context():
             Tag.create("tag1")
 
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to commit transaction")
 
             Tag.create("tag1")
 
@@ -353,7 +170,11 @@ class TagCreationTests(TestCase):
             self.assertIsNone(tag.id)
             self.assertEqual(tag.name, "tag1")
 
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to commit transaction")
 
             self.assertIsNotNone(tag.id)
 
@@ -370,37 +191,7 @@ class TagCreationTests(TestCase):
             self.assertEqual(tag.name, "tag1")
 
 
-class UrlCreationTests(TestCase):
-    def setUp(self):
-        settings_file = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "settings.py")
-
-        self.db_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "test_pagetags.db")
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
-        self.app = create_app(settings_file, "testing")
-
-        with self.app.app_context():
-            db.create_all()
-
-            self.assertEqual(db.session.query(Url).count(), 0)
-
-    def tearDown(self):
-        with self.app.app_context():
-            db.session.remove()
-            db.drop_all()
-            db.get_engine(self.app).dispose()
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
+class UrlCreationTests(PagetagsTest):
     def test_create_url(self):
         with self.app.app_context():
             url = Url.create("http://www.example.com")
@@ -409,7 +200,11 @@ class UrlCreationTests(TestCase):
             self.assertIsNone(url.id)
             self.assertEqual(url.url, "http://www.example.com")
 
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to commit transaction")
 
             self.assertIsNotNone(url.id)
 
@@ -417,7 +212,11 @@ class UrlCreationTests(TestCase):
         with self.app.app_context():
             Url.create("http://www.example.com")
 
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to commit transaction")
 
             Url.create("http://www.example.com")
 
@@ -431,7 +230,11 @@ class UrlCreationTests(TestCase):
             self.assertIsNone(url.id)
             self.assertEqual(url.url, "http://www.example.com")
 
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to commit transaction")
 
             self.assertIsNotNone(url.id)
 
@@ -439,7 +242,11 @@ class UrlCreationTests(TestCase):
         with self.app.app_context():
             Url.create("http://www.example.com")
 
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to commit transaction")
 
             url = Url.get_or_create("http://www.example.com")
 
@@ -458,39 +265,7 @@ class UrlCreationTests(TestCase):
             self.assertRaises(ValueError, Url.create, large_url)
 
 
-class PostCreationTests(TestCase):
-    def setUp(self):
-        settings_file = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "settings.py")
-
-        self.db_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "test_pagetags.db")
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
-        self.app = create_app(settings_file, "testing")
-
-        with self.app.app_context():
-            db.create_all()
-
-            self.assertEqual(db.session.query(Url).count(), 0)
-            self.assertEqual(db.session.query(Tag).count(), 0)
-            self.assertEqual(db.session.query(Post).count(), 0)
-
-    def tearDown(self):
-        with self.app.app_context():
-            db.session.remove()
-            db.drop_all()
-            db.get_engine(self.app).dispose()
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
+class PostCreationTests(PagetagsTest):
     def test_create_posting(self):
         with self.app.app_context():
             post = Post.create(
@@ -508,7 +283,11 @@ class PostCreationTests(TestCase):
                 ["tag1", "tag2"]
             )
 
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to commit transaction")
 
             self.assertIsNotNone(post.id)
 
@@ -520,7 +299,11 @@ class PostCreationTests(TestCase):
                 ["tag1", "tag2"]
             )
 
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to commit transaction")
 
             self.assertItemsEqual(post.tag_names(), ["tag1", "tag2"])
 
@@ -547,190 +330,40 @@ class PostCreationTests(TestCase):
             )
 
 
-class UrlPostRetrievalTests(TestCase):
-    def setUp(self):
-        settings_file = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "settings.py")
-
-        self.db_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "test_pagetags.db")
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
-        self.app = create_app(settings_file, "testing")
-
-        with self.app.app_context():
-            db.create_all()
-
-            self.assertEqual(db.session.query(Url).count(), 0)
-            self.assertEqual(db.session.query(Tag).count(), 0)
-            self.assertEqual(db.session.query(Post).count(), 0)
-
-    def tearDown(self):
-        with self.app.app_context():
-            db.session.remove()
-            db.drop_all()
-            db.get_engine(self.app).dispose()
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
+class UrlPostRetrievalTests(PagetagsTestWithMockData):
     def test_retrieve_url_posts(self):
         with self.app.app_context():
-            Url.create("http://www.example.com/page_1")
-            Url.create("http://www.example.com/page_2")
-
-            db.session.commit()
-
-            Post.create("page 1 test 1", "http://www.example.com/page_1",
-                        ["tag1", "tag2"])
-
-            db.session.commit()
-
-            # sleep for a while so that the next posting has a different
-            # added_at datetime
-            time.sleep(0.1)
-
-            Post.create("page 1 test 2", "http://www.example.com/page_1",
-                        ["tag1", "tag3"])
-
-            db.session.commit()
-
             posts = Url.get_posts("http://www.example.com/page_1")
 
-            self.assertEqual(len(posts), 2)
+            self.assertEqual(len(posts), 3)
 
-            self.assertEqual(posts[0].title, "page 1 test 2")
-            self.assertEqual(posts[1].title, "page 1 test 1")
+            self.assertEqual(posts[0].title, "post3")
+            self.assertEqual(posts[1].title, "post2")
+            self.assertEqual(posts[2].title, "post1")
 
     def test_retrieve_url_posts_by_page(self):
         with self.app.app_context():
-            url = Url.create("http://www.example.com/page_1")
-            Url.create("http://www.example.com/page_2")
-
-            db.session.commit()
-
-            Post.create("page 1 test 1", "http://www.example.com/page_1",
-                        ["tag1", "tag2"])
-
-            db.session.commit()
-
-            # sleep for a while so that the next posting has a different
-            # added_at datetime
-            time.sleep(0.1)
-
-            Post.create("page 1 test 2", "http://www.example.com/page_1",
-                        ["tag1", "tag3"])
-
-            db.session.commit()
-
-            # sleep for a while so that the next posting has a different
-            # added_at datetime
-            time.sleep(0.1)
-
-            Post.create("page 1 test 3", "http://www.example.com/page_1",
-                        ["tag1", "tag4"])
-
-            db.session.commit()
-
-            # sleep for a while so that the next posting has a different
-            # added_at datetime
-            time.sleep(0.1)
-
-            Post.create("page 2 test 1", "http://www.example.com/page_2",
-                        ["tag1", "tag5"])
-
-            db.session.commit()
+            url = Url.get_by_url("http://www.example.com/page_1")
 
             paginator = url.get_posts_by_page(1, per_page=2)
 
             self.assertEqual(len(paginator.items), 2)
 
-            self.assertEqual(paginator.items[0].title, "page 1 test 3")
-            self.assertEqual(paginator.items[1].title, "page 1 test 2")
+            self.assertEqual(paginator.items[0].title, "post3")
+            self.assertEqual(paginator.items[1].title, "post2")
 
     def test_retrieve_second_page_of_url_posts(self):
         with self.app.app_context():
-            url = Url.create("http://www.example.com/page_1")
-            Url.create("http://www.example.com/page_2")
-
-            db.session.commit()
-
-            Post.create("page 1 test 1", "http://www.example.com/page_1",
-                        ["tag1", "tag2"])
-
-            db.session.commit()
-
-            # sleep for a while so that the next posting has a different
-            # added_at datetime
-            time.sleep(0.1)
-
-            Post.create("page 1 test 2", "http://www.example.com/page_1",
-                        ["tag1", "tag3"])
-
-            db.session.commit()
-
-            # sleep for a while so that the next posting has a different
-            # added_at datetime
-            time.sleep(0.1)
-
-            Post.create("page 1 test 3", "http://www.example.com/page_1",
-                        ["tag1", "tag4"])
-
-            db.session.commit()
-
-            # sleep for a while so that the next posting has a different
-            # added_at datetime
-            time.sleep(0.1)
-
-            Post.create("page 2 test 1", "http://www.example.com/page_2",
-                        ["tag1", "tag5"])
-
-            db.session.commit()
+            url = Url.get_by_url("http://www.example.com/page_1")
 
             paginator = url.get_posts_by_page(2, per_page=2)
 
             self.assertEqual(len(paginator.items), 1)
 
-            self.assertEqual(paginator.items[0].title, "page 1 test 1")
+            self.assertEqual(paginator.items[0].title, "post1")
 
 
-class PostPaginationTests(TestCase):
-    def setUp(self):
-        settings_file = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "settings.py")
-
-        self.db_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "test_pagetags.db")
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
-        self.app = create_app(settings_file, "testing")
-
-        with self.app.app_context():
-            db.create_all()
-
-            load_mock_posts(db)
-
-    def tearDown(self):
-        with self.app.app_context():
-            db.session.remove()
-            db.drop_all()
-            db.get_engine(self.app).dispose()
-
-        try:
-            os.remove(self.db_path)
-        except:
-            pass
-
+class PostPaginationTests(PagetagsTestWithMockData):
     def test_get_latest_by_page(self):
         with self.app.app_context():
             paginator = Post.get_latest_by_page(page=1, per_page=2)
@@ -739,8 +372,8 @@ class PostPaginationTests(TestCase):
             self.assertEqual(paginator.pages, 2)
             self.assertEqual(paginator.page, 1)
 
-            self.assertEqual(paginator.items[0].title, "page 4")
-            self.assertEqual(paginator.items[1].title, "page 3")
+            self.assertEqual(paginator.items[0].title, "post4")
+            self.assertEqual(paginator.items[1].title, "post3")
 
             self.assertFalse(paginator.has_prev)
             self.assertTrue(paginator.has_next)
