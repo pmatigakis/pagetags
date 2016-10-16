@@ -3,14 +3,17 @@ from logging.handlers import RotatingFileHandler
 
 from flask import Flask
 from flask_restful import Api
+from flask_admin import Admin
 
 from pagetags import login_manager
-from pagetags.models import db
+from pagetags.models import db, Tag, Url, Post, User
 from pagetags.views import index, new_url, tag, login, logout
 from pagetags.authentication import load_user, authenticate, identity
 from pagetags.api import (TagsResource, TagPostsResource, PostsResource,
                           UrlResource)
 from pagetags import jwt
+from pagetags.admin import (AuthenticatedModelView, UserModelView,
+                            AuthenticatedIndexView)
 
 
 def initialize_logging(app):
@@ -82,5 +85,12 @@ def create_app(settings_file, environment_type=None):
     jwt.authentication_callback = authenticate
     jwt.identity_callback = identity
     jwt.init_app(app)
+
+    admin = Admin(app, name='admin', template_mode='bootstrap3',
+                  index_view=AuthenticatedIndexView())
+    admin.add_view(AuthenticatedModelView(Tag, db.session))
+    admin.add_view(AuthenticatedModelView(Url, db.session))
+    admin.add_view(AuthenticatedModelView(Post, db.session))
+    admin.add_view(UserModelView(User, db.session))
 
     return app

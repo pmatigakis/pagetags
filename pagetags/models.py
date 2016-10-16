@@ -76,6 +76,9 @@ class User(UserMixin, db.Model):
                          .filter_by(id=user_id, jti=jti)\
                          .one_or_none()
 
+    def __unicode__(self):
+        return self.username
+
 
 class Tag(db.Model):
     __tablename__ = "tags"
@@ -121,6 +124,9 @@ class Tag(db.Model):
         return db.session.query(Post)\
                          .filter(Post.tags.contains(self))\
                          .all()
+
+    def __unicode__(self):
+        return self.name
 
 
 class Url(db.Model):
@@ -188,6 +194,9 @@ class Url(db.Model):
 
         return url
 
+    def __unicode__(self):
+        return self.url
+
 
 class Post(db.Model):
     __tablename__ = "posts"
@@ -248,3 +257,6 @@ class Post(db.Model):
             raise ValueError()
 
         return title
+
+    def __unicode__(self):
+        return self.title
