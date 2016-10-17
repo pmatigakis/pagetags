@@ -8,7 +8,8 @@ from flask_admin import Admin
 from pagetags import login_manager
 from pagetags.models import db, Tag, Url, Post, User
 from pagetags.views import index, new_url, tag, login, logout
-from pagetags.authentication import load_user, authenticate, identity
+from pagetags.authentication import (load_user, authenticate, identity,
+                                     payload_handler)
 from pagetags.api import (TagsResource, TagPostsResource, PostsResource,
                           UrlResource)
 from pagetags import jwt
@@ -84,6 +85,7 @@ def create_app(settings_file, environment_type=None):
 
     jwt.authentication_callback = authenticate
     jwt.identity_callback = identity
+    jwt.jwt_payload_callback = payload_handler
     jwt.init_app(app)
 
     admin = Admin(app, name='admin', template_mode='bootstrap3',

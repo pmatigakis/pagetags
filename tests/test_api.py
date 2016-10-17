@@ -2,6 +2,8 @@ from unittest import main
 import json
 import urllib
 
+import jwt
+
 from pagetags.models import Post, Url
 
 from common import PagetagsTestWithMockData
@@ -542,6 +544,33 @@ class APIPostRetrievalTests(PagetagsTestWithMockData):
         )
 
         self.assertEqual(response.status_code, 404)
+
+
+class AuthenticationTests(PagetagsTestWithMockData):
+    def test_authenticate(self):
+        request_data = {
+            "username": self.test_user_username,
+            "password": self.test_user_password
+        }
+
+        response = self.client.post(
+            "/auth",
+            data=json.dumps(request_data),
+            headers={"Content-Type": "application/json"},
+            follow_redirects=True
+        )
+
+        response = json.loads(response.data)
+
+        self.assertIn("access_token", response)
+        self.assertIsNotNone(response["access_token"])
+
+        payload = jwt.decode(response["access_token"], verify=False)
+
+        self.assertIn("identity", payload)
+        self.assertIn("jti", payload)
+        self.assertIsNotNone(payload["identity"])
+        self.assertIsNotNone(payload["jti"])
 
 
 if __name__ == "__main__":
