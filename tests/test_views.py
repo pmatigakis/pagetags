@@ -55,6 +55,38 @@ class LoginTests(PagetagsTestsWithUser):
         self.assertIn("<title>PageTags - Login</title>", response.data)
         self.assertIn("<h1>Login</h1>", response.data)
 
+    def test_fail_to_login_with_invalid_password(self):
+        request_data = {
+            "username": self.test_user_username,
+            "password": "12345678"
+        }
+
+        response = self.client.get("/login", follow_redirects=True)
+
+        self.assertIn("PageTags - Login", response.data)
+
+        response = self.client.post("/login",
+                                    data=request_data,
+                                    follow_redirects=True)
+
+        self.assertIn("invalid username or password", response.data)
+
+    def test_fail_to_login_with_invalid_username(self):
+        request_data = {
+            "username": "abcdefg",
+            "password": self.test_user_password
+        }
+
+        response = self.client.get("/login", follow_redirects=True)
+
+        self.assertIn("PageTags - Login", response.data)
+
+        response = self.client.post("/login",
+                                    data=request_data,
+                                    follow_redirects=True)
+
+        self.assertIn("invalid username or password", response.data)
+
 
 class NewUrlViewTests(PagetagsTestsWithUser):
     def test_new_url(self):
