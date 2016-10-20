@@ -14,7 +14,8 @@ setup(
         "Flask-RESTful==0.3.5",
         "alembic==0.8.7",
         "psycopg2==2.6.2",
-        "Flask-Admin==1.4.2"
+        "Flask-Admin==1.4.2",
+        "uWSGI==2.0.14"
     ],
     include_package_data=True,
     zip_safe=False,
