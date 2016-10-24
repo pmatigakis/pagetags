@@ -6,7 +6,7 @@ from flask_restful import Api
 from flask_admin import Admin
 
 from pagetags import login_manager
-from pagetags.models import db, Tag, Url, Post, User
+from pagetags.models import db, Post
 from pagetags.views import index, new_url, tag, login, logout
 from pagetags.authentication import (load_user, authenticate, identity,
                                      payload_handler)
@@ -14,7 +14,7 @@ from pagetags.api import (TagsResource, TagPostsResource, PostsResource,
                           UrlResource)
 from pagetags import jwt
 from pagetags.admin import (AuthenticatedModelView, UserModelView,
-                            AuthenticatedIndexView)
+                            AuthenticatedIndexView, TagModelView, UrlModelView)
 
 
 def initialize_logging(app):
@@ -90,9 +90,9 @@ def create_app(settings_file, environment_type=None):
 
     admin = Admin(app, name='admin', template_mode='bootstrap3',
                   index_view=AuthenticatedIndexView())
-    admin.add_view(AuthenticatedModelView(Tag, db.session))
-    admin.add_view(AuthenticatedModelView(Url, db.session))
+    admin.add_view(TagModelView(db.session))
+    admin.add_view(UrlModelView(db.session))
     admin.add_view(AuthenticatedModelView(Post, db.session))
-    admin.add_view(UserModelView(User, db.session))
+    admin.add_view(UserModelView(db.session))
 
     return app
