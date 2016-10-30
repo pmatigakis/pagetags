@@ -23,10 +23,16 @@ def initialize_logging(app):
     log_file_count = app.config["LOG_FILE_COUNT"]
     log_level = app.config["LOG_LEVEL"]
 
+    log_format = "%(asctime)s %(levelname)s [%(process)d:%(thread)d] " \
+                 "%(name)s [%(pathname)s:%(funcName)s:%(lineno)d] %(message)s"
+    formatter = logging.Formatter(log_format)
+
     handler = RotatingFileHandler(log_file,
                                   maxBytes=log_file_size,
                                   backupCount=log_file_count,
                                   encoding="utf8")
+
+    handler.setFormatter(formatter)
 
     app.logger.addHandler(handler)
     if app.config["DEBUG"]:

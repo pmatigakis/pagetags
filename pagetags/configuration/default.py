@@ -3,7 +3,7 @@ import logging
 
 PROPAGATE_EXCEPTIONS = True
 
-ENABLE_LOGGING = True
+ENABLE_LOGGING = False
 
 LOG_FILE = "pagetags.log"
 LOG_LEVEL = logging.INFO
