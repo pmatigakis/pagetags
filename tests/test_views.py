@@ -286,7 +286,7 @@ class TagViewTests(PagetagsTestWithMockData):
 
         response = self.client.get("/tag/tag444")
 
-        self.assertIn("<title>404 Not Found</title>", response.data)
+        self.assertIn("<p>This page doesn't exist</p>", response.data)
 
         self.logout()
 

@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, abort, current_app, flash
+from flask import render_template, redirect, url_for, current_app, flash
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -65,7 +65,7 @@ def tag(name):
 
     if tag_object is None:
         current_app.logger.warning(u"tag doesn't exist: tag({})".format(name))
-        abort(404)
+        return render_template("404.html"), 404
 
     paginator = tag_object.get_posts_by_page(
         args.page, per_page=postings_item_count)
