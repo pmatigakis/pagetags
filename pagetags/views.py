@@ -11,7 +11,7 @@ def index():
 
     args = reqparsers.posts.parse_args()
 
-    msg = u"listing posts page(%d) items_in_page(%d)"
+    msg = u"listing posts: page(%d) items_in_page(%d)"
     current_app.logger.info(msg, args.page, front_page_item_count)
 
     paginator = models.Post.get_latest_by_page(
@@ -29,7 +29,7 @@ def new_url():
         url = form.url.data.lower()
         tags = form.tags.data.lower().split(" ")
 
-        msg = u"adding post title({}) - url({}) - tags({})"
+        msg = u"adding post: title({}) - url({}) - tags({})"
         current_app.logger.info(msg.format(title, url, ','.join(tags)))
 
         posting = models.Post.create(title, url, tags)
@@ -39,12 +39,12 @@ def new_url():
         except SQLAlchemyError:
             db.session.rollback()
 
-            msg = u"failed to save post title({}) url({})"
+            msg = u"failed to save post: title({}) url({})"
             current_app.logger.exception(msg.format(title, url))
 
             return redirect(url_for("index"))
 
-        msg = u"Added post id(%d) title(%s) url(%s)"
+        msg = u"Added post: id(%d) title(%s) url(%s)"
         current_app.logger.info(msg, posting.id, title, url)
 
         return redirect(url_for("index"))
@@ -58,13 +58,13 @@ def tag(name):
 
     postings_item_count = current_app.config["TAG_POSTS_PER_PAGE"]
 
-    msg = u"listing posts for tag({}) page({})"
+    msg = u"listing posts for tag: tag({}) page({})"
     current_app.logger.info(msg.format(name, args.page))
 
     tag_object = models.Tag.get_by_name(name)
 
     if tag_object is None:
-        current_app.logger.warning(u"tag doesn't exist tag({})".format(name))
+        current_app.logger.warning(u"tag doesn't exist: tag({})".format(name))
         abort(404)
 
     paginator = tag_object.get_posts_by_page(

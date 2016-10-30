@@ -1,6 +1,7 @@
 from flask_restful import Resource, abort
 from flask_jwt import jwt_required
 from sqlalchemy.exc import SQLAlchemyError
+from flask import current_app
 
 from pagetags import models, db, reqparsers
 
@@ -8,6 +9,9 @@ from pagetags import models, db, reqparsers
 class TagsResource(Resource):
     @jwt_required()
     def get(self):
+        msg = "retrieving available tags"
+        current_app.logger.info(msg)
+
         tags = db.session.query(models.Tag).all()
 
         return [tag.name for tag in tags]
@@ -16,11 +20,24 @@ class TagsResource(Resource):
 class TagPostsResource(Resource):
     @jwt_required()
     def get(self, tag):
-        tag = models.Tag.get_by_name(tag)
+        tag_object = models.Tag.get_by_name(tag)
+
+        if tag_object is None:
+            msg = "tag doesn't exist: tag(%s)"
+            current_app.logger.warning(msg, tag)
+
+            abort(
+                404,
+                error="tag doesn't exis",
+                tag=tag
+            )
 
         args = reqparsers.tag_posts.parse_args()
 
-        paginator = tag.get_posts_by_page(args.page, args.per_page)
+        msg = "retrieving posts for tag: tag(%s) page(%d) per_page(%d)"
+        current_app.logger.info(msg, tag, args.page, args.per_page)
+
+        paginator = tag_object.get_posts_by_page(args.page, args.per_page)
 
         posts = [
             {
@@ -46,6 +63,9 @@ class PostsResource(Resource):
     def post(self):
         args = reqparsers.post.parse_args()
 
+        msg = "adding post: title(%s) url(%s) tags(%s)"
+        current_app.logger.info(msg, args.title, args.url, ",".join(args.tags))
+
         post = models.Post.create(args.title, args.url, args.tags)
 
         try:
@@ -53,13 +73,26 @@ class PostsResource(Resource):
         except SQLAlchemyError:
             db.session.rollback()
 
-            abort(500)
+            msg = "failed to add post: title(%s) url(%s) tags(%s)"
+            current_app.logger.exception(
+                msg, args.title, args.url, ",".join(args.tags))
+
+            abort(
+                500,
+                error="failed to add post",
+                url=args.url,
+                title=args.title,
+                tags=args.tags
+            )
 
         return {"id": post.id}
 
     @jwt_required()
     def get(self):
         args = reqparsers.posts.parse_args()
+
+        msg = "retrieving posts: page(%d) per_page(%d)"
+        current_app.logger.info(msg, args.page, args.per_page)
 
         paginator = models.Post.get_latest_by_page(
             args.page, per_page=args.per_page)
@@ -88,7 +121,19 @@ class UrlResource(Resource):
     def get(self):
         args = reqparsers.url_query.parse_args()
 
+        msg = "retrieving posts for url: url(%s) page(%d) per_page(%d)"
+        current_app.logger.info(msg, args.url, args.page, args.per_page)
+
         url = models.Url.get_by_url(args.url)
+
+        if url is None:
+            msg = "url doesn't exist: url(%s)"
+            current_app.logger.warning(msg, args.url)
+            abort(
+                404,
+                error="url doesn't exist",
+                url=args.url
+            )
 
         paginator = url.get_posts_by_page(args.page, args.per_page)
 
