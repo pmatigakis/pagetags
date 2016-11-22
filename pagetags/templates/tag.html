@@ -25,26 +25,16 @@
                     </div>
                 </div>
             {% endfor %}
-
-            <div>
-                {% if paginator.has_prev %}
-                <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.prev_num }}">prev</a>
-                {% endif %}
-
-                {% if paginator.has_next %}
-                <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.next_num }}">next</a>
-                {% endif %}
-            </div>
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-12">
-            <span>Page {{ paginator.page }}</span>
-
             {% if paginator.has_prev %}
                 <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.prev_num }}">Previous</a>
             {% endif %}
+
+            <span>Page {{ paginator.page }}</span>
 
             {% if paginator.has_next %}
                 <a href="{{ url_for('tag', name=tag.name) }}?page={{ paginator.next_num }}">Next</a>
