@@ -114,6 +114,12 @@ class Tag(db.Model):
 
         return tag
 
+    @classmethod
+    def get_tags_by_page(cls, page, per_page=10):
+        return cls.query\
+                  .order_by(db.asc(cls.name))\
+                  .paginate(page=page, per_page=per_page)
+
     def get_posts_by_page(self, page, per_page=10):
         return Post.query\
                    .filter(Post.tags.contains(self))\
@@ -124,6 +130,11 @@ class Tag(db.Model):
         return db.session.query(Post)\
                          .filter(Post.tags.contains(self))\
                          .all()
+
+    def post_count(self):
+        return db.session.query(Post) \
+                 .filter(Post.tags.contains(self)) \
+                 .count()
 
     def __unicode__(self):
         return self.name

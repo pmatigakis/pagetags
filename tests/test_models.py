@@ -1,8 +1,9 @@
 from unittest import main
 
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-
 from werkzeug.security import check_password_hash
+from flask_sqlalchemy import Pagination
+
 from pagetags.models import User, Tag, Post, Url
 from pagetags import db
 
@@ -378,6 +379,31 @@ class PostPaginationTests(PagetagsTestWithMockData):
             self.assertFalse(paginator.has_prev)
             self.assertTrue(paginator.has_next)
             self.assertEqual(paginator.next_num, 2)
+
+
+class TagTests(PagetagsTestWithMockData):
+    def test_post_count(self):
+        with self.app.app_context():
+            tag = Tag.get_by_name("tag2")
+
+            self.assertEqual(tag.post_count(), 2)
+
+    def test_get_tags_by_page(self):
+        with self.app.app_context():
+            paginator = Tag.get_tags_by_page(page=1, per_page=2)
+
+            self.assertIsInstance(paginator, Pagination)
+            self.assertEqual(paginator.page, 1)
+            self.assertEqual(paginator.per_page, 2)
+
+            self.assertEqual(paginator.items[0].name, "tag1")
+            self.assertEqual(paginator.items[1].name, "tag2")
+
+            paginator = Tag.get_tags_by_page(page=2, per_page=2)
+
+            self.assertEqual(paginator.page, 2)
+            self.assertEqual(paginator.items[0].name, "tag3")
+            self.assertEqual(paginator.items[1].name, "tag4")
 
 
 if __name__ == "__main__":

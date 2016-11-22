@@ -393,5 +393,53 @@ class AdminPageViewtests(PagetagsTestWithMockData):
             self.assertIn("<title>Home - admin</title>", response.data)
 
 
+class TagListViewTests(PagetagsTestWithMockData):
+    def test_view_tags(self):
+        self.login()
+
+        response = self.client.get("/tags")
+
+        self.assertIn("<title>PageTags - Tags</title>", response.data)
+
+        self.assertIn("tag1", response.data)
+        self.assertIn("tag2", response.data)
+        self.assertNotIn("tag3", response.data)
+        self.assertNotIn(
+            "<a href=\"/tags?page=0\">Previous</a>",
+            response.data
+        )
+
+        self.assertIn(
+            "<a href=\"/tags?page=2\">Next</a>",
+            response.data
+        )
+
+        self.logout()
+
+    def test_view_tags_page_2(self):
+        self.login()
+
+        response = self.client.get("/tags?page=2")
+
+        self.assertIn("<title>PageTags - Tags</title>", response.data)
+
+        self.assertNotIn("tag1", response.data)
+        self.assertNotIn("tag2", response.data)
+        self.assertIn("tag3", response.data)
+        self.assertIn("tag4", response.data)
+        self.assertNotIn("tag5", response.data)
+        self.assertIn(
+            "<a href=\"/tags?page=1\">Previous</a>",
+            response.data
+        )
+
+        self.assertIn(
+            "<a href=\"/tags?page=3\">Next</a>",
+            response.data
+        )
+
+        self.logout()
+
+
 if __name__ == "__main__":
     main()
