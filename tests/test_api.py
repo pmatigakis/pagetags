@@ -377,6 +377,7 @@ class UrlAPIEndpointTests(PagetagsTestWithMockData):
 
         response = json.loads(response.data)
 
+        self.assertEqual(response["url_id"], 1)
         self.assertFalse(response["has_more"])
         self.assertEqual(response["page"], 1)
         self.assertEqual(response["per_page"], 10)

@@ -152,6 +152,7 @@ class UrlResource(Resource):
         ]
 
         return {
+            "url_id": url.id,
             "posts": posts,
             "has_more": paginator.has_next,
             "page": args.page,
