@@ -84,7 +84,8 @@ class PostsResource(Resource):
                 error="failed to add post",
                 url=args.url,
                 title=args.title,
-                tags=args.tags
+                tags=args.tags,
+                error_code=error_codes.POST_CREATION_DATABASE_ERROR
             )
 
         return {"id": post.id}

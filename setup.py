@@ -20,7 +20,10 @@ setup(
     include_package_data=True,
     zip_safe=False,
     setup_requires=["nose==1.3.7"],
-    tests_require=["nose==1.3.7"],
+    tests_require=[
+        "nose==1.3.7",
+        "mock==2.0.0"
+    ],
     test_suite = 'nose.collector',
     entry_points={
         'console_scripts': [

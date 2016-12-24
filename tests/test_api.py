@@ -3,6 +3,8 @@ import json
 import urllib
 
 import jwt
+from mock import patch
+from sqlalchemy.exc import SQLAlchemyError
 
 from pagetags.models import Post, Url
 
@@ -189,7 +191,7 @@ class ApiAuthenticationTests(PagetagsTestWithMockData):
 
 
 class PostApiTests(PagetagsTestWithMockData):
-    def test_add_posting(self):
+    def test_add_post(self):
         token = self.authenticate(
             self.test_user_username, self.test_user_password)
 
@@ -320,6 +322,41 @@ class PostApiTests(PagetagsTestWithMockData):
             response_data,
             {u'message': {
                 u'url': u'The url length is over the maximum allowed'}}
+        )
+
+    @patch("pagetags.api.db.session.commit")
+    def test_fail_to_add_post_when_database_commit_fails(self, commit_mock):
+        commit_mock.side_effect = SQLAlchemyError
+
+        token = self.authenticate(
+            self.test_user_username, self.test_user_password)
+
+        posting = {
+            "title": "posting title",
+            "url": "http://www.example.com",
+            "tags": ["tag1", "tag2"]
+        }
+
+        response = self.client.post(
+            "/api/v1/posts",
+            headers={"Authorization": "JWT %s" % token,
+                     "Content-Type": "application/json"},
+            data=json.dumps(posting)
+        )
+
+        self.assertEqual(response.status_code, 500)
+
+        response = json.loads(response.data)
+
+        self.assertDictEqual(
+            response,
+            {
+                'error': 'failed to add post',
+                'error_code': 2000,
+                'tags': ['tag1', 'tag2'],
+                'title': 'posting title',
+                'url': 'http://www.example.com'
+            }
         )
 
 
