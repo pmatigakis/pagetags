@@ -35,6 +35,7 @@ class TagsTest(PagetagsTestWithMockData):
 
         response = json.loads(response.data)
 
+        self.assertEqual(response["tag_id"], 2)
         self.assertEqual(response["page"], 1)
         self.assertEqual(response["per_page"], 10)
         self.assertEqual(len(response["posts"]), 2)

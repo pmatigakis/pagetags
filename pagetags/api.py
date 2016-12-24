@@ -52,6 +52,7 @@ class TagPostsResource(Resource):
         ]
 
         return {
+            "tag_id": tag_object.id,
             "posts": posts,
             "has_more": paginator.has_next,
             "page": args.page,
