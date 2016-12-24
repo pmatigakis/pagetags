@@ -135,7 +135,8 @@ class UrlResource(Resource):
             abort(
                 404,
                 error="url doesn't exist",
-                url=args.url
+                url=args.url,
+                error_code=error_codes.URL_DOES_NOT_EXIST
             )
 
         paginator = url.get_posts_by_page(args.page, args.per_page)

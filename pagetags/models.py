@@ -196,7 +196,7 @@ class Url(db.Model):
         return Post.query\
                    .filter(Post.url == self)\
                    .order_by(db.desc(Post.added_at))\
-                   .paginate(page=page, per_page=per_page)
+                   .paginate(page=page, per_page=per_page, error_out=False)
 
     @validates("url")
     def validate_url(self, key, url):

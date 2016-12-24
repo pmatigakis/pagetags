@@ -457,6 +457,31 @@ class UrlAPIEndpointTests(PagetagsTestWithMockData):
         self.assertItemsEqual(response["posts"][0]["tags"], ["tag1", "tag2"])
         self.assertIsNotNone(response["posts"][0]["added_at"])
 
+    def test_fail_to_retrieve_posts_for_url_that_does_not_exist(self):
+        token = self.authenticate(
+            self.test_user_username, self.test_user_password)
+
+        url = "http://www.example.com/page_111"
+
+        response = self.client.get(
+            "/api/v1/url?%s" % urllib.urlencode({"url": url}),
+            headers={"Authorization": "JWT %s" % token,
+                     "Content-Type": "application/json"},
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+        response = json.loads(response.data)
+
+        self.assertDictEqual(
+            response,
+            {
+                'error': "url doesn't exist",
+                'error_code': 3000,
+                'url': 'http://www.example.com/page_111'
+            }
+        )
+
 
 class APIPostRetrievalTests(PagetagsTestWithMockData):
     def test_get_latest_posts(self):
