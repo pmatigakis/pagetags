@@ -126,7 +126,7 @@ class TagsTest(PagetagsTestWithMockData):
         token = self.authenticate(
             self.test_user_username, self.test_user_password)
 
-        endpoint_url = "/api/v1/tag/tag1?%s" % urllib.urlencode(
+        endpoint_url = "/api/v1/tag/tag111?%s" % urllib.urlencode(
             {"page": 3, "per_page": 2})
 
         client = self.app.test_client()
@@ -137,6 +137,17 @@ class TagsTest(PagetagsTestWithMockData):
         )
 
         self.assertEqual(response.status_code, 404)
+
+        data = json.loads(response.data)
+
+        self.assertDictEqual(
+            data,
+            {
+                'error': "tag doesn't exist",
+                'error_code': 1000,
+                'tag': 'tag111'
+             }
+        )
 
 
 class FailtToAccessApPIEndpointWithouTokenTests(PagetagsTestWithMockData):

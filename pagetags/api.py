@@ -3,7 +3,7 @@ from flask_jwt import jwt_required
 from sqlalchemy.exc import SQLAlchemyError
 from flask import current_app
 
-from pagetags import models, db, reqparsers
+from pagetags import models, db, reqparsers, error_codes
 
 
 class TagsResource(Resource):
@@ -28,8 +28,9 @@ class TagPostsResource(Resource):
 
             abort(
                 404,
-                error="tag doesn't exis",
-                tag=tag
+                error="tag doesn't exist",
+                tag=tag,
+                error_code=error_codes.TAG_NOT_FOUND
             )
 
         args = reqparsers.tag_posts.parse_args()

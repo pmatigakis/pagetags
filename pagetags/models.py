@@ -124,7 +124,7 @@ class Tag(db.Model):
         return Post.query\
                    .filter(Post.tags.contains(self))\
                    .order_by(db.desc(Post.added_at))\
-                   .paginate(page=page, per_page=per_page)
+                   .paginate(page=page, per_page=per_page, error_out=False)
 
     def get_posts(self):
         return db.session.query(Post)\
