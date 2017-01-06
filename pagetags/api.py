@@ -213,6 +213,8 @@ class PostResource(Resource):
         try:
             db.session.commit()
         except SQLAlchemyError:
+            db.session.rollback()
+
             abort(
                 404,
                 error="failed to update post",

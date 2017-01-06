@@ -673,6 +673,28 @@ class PostRetrievalTests(PagetagsTestWithMockData):
             }
         )
 
+    def test_fail_to_get_post_using_id_that_does_not_exist(self):
+        token = self.authenticate(
+            self.test_user_username, self.test_user_password)
+
+        response = self.client.get(
+            "/api/v1/post/111111",
+            headers={"Authorization": "JWT %s" % token}
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+        data = json.loads(response.data)
+
+        self.assertDictEqual(
+            data,
+            {
+                'error': "post doesn't exist",
+                'error_code': 3001,
+                'post_id': 111111
+            }
+        )
+
 
 class PostUpdateTests(PagetagsTestWithMockData):
     def test_update(self):
@@ -707,6 +729,72 @@ class PostUpdateTests(PagetagsTestWithMockData):
                 'url': 'http://www.example_1.com/new_post1_url',
                 'added_at': '2016-10-05 12:30:00'
             }
+        )
+
+    def test_fail_to_update_post_that_does_not_exist(self):
+        token = self.authenticate(
+            self.test_user_username, self.test_user_password)
+
+        new_data = {
+            "title": "new post1 title",
+            "url": "http://www.example_1.com/new_post1_url",
+            "tags": ["tag1111", "tag2222"]
+        }
+
+        response = self.client.put(
+            "/api/v1/post/111111",
+            headers={
+                "Authorization": "JWT %s" % token,
+                "Content-Type": "application/json"
+            },
+            data=json.dumps(new_data)
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+        data = json.loads(response.data)
+
+        self.assertDictEqual(
+            data,
+            {
+                'error': "post doesn't exist",
+                'error_code': 3001,
+                'post_id': 111111
+            }
+        )
+
+    @patch("pagetags.api.db.session.commit")
+    def test_fail_to_update_post_when_database_commit_fails(self, commit_mock):
+        commit_mock.side_effect = SQLAlchemyError
+
+        token = self.authenticate(
+            self.test_user_username, self.test_user_password)
+
+        new_data = {
+            "title": "new post1 title",
+            "url": "http://www.example_1.com/new_post1_url",
+            "tags": ["tag1111", "tag2222"]
+        }
+
+        response = self.client.put(
+            "/api/v1/post/1",
+            headers={
+                "Authorization": "JWT %s" % token,
+                "Content-Type": "application/json"
+            },
+            data=json.dumps(new_data)
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+        data = json.loads(response.data)
+
+        self.assertDictEqual(
+            data,
+            {
+                'error': 'failed to update post',
+                'error_code': 2001,
+                'post_id': 1}
         )
 
 
