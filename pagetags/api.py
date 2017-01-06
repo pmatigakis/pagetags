@@ -215,6 +215,9 @@ class PostResource(Resource):
         except SQLAlchemyError:
             db.session.rollback()
 
+            msg = "failed to update post: post_id(%d)"
+            current_app.logger.exception(msg, post_id)
+
             abort(
                 404,
                 error="failed to update post",
