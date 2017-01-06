@@ -648,5 +648,31 @@ class AuthenticationTests(PagetagsTestWithMockData):
         self.assertIsNotNone(payload["jti"])
 
 
+class PostRetrievalTests(PagetagsTestWithMockData):
+    def test_get_post_using_id(self):
+        token = self.authenticate(
+            self.test_user_username, self.test_user_password)
+
+        response = self.client.get(
+            "/api/v1/post/1",
+            headers={"Authorization": "JWT %s" % token}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        data = json.loads(response.data)
+
+        self.assertDictEqual(
+            data,
+            {
+                'id': 1,
+                'title': 'post1',
+                'tags': ['tag1', 'tag2'],
+                'url': 'http://www.example.com/page_1',
+                'added_at': '2016-10-05 12:30:00'
+            }
+        )
+
+
 if __name__ == "__main__":
     main()

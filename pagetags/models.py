@@ -262,6 +262,10 @@ class Post(db.Model):
                   .order_by(db.desc(cls.added_at))\
                   .paginate(page=page, per_page=per_page)
 
+    @classmethod
+    def get_by_id(cls, post_id):
+        return db.session.query(cls).get(post_id)
+
     @validates("title")
     def validate_title(self, key, title):
         if len(title) == 0 or len(title) > self.TITLE_LENGTH:

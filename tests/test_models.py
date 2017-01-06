@@ -406,5 +406,16 @@ class TagTests(PagetagsTestWithMockData):
             self.assertEqual(paginator.items[1].name, "tag4")
 
 
+class PostRetrievalTests(PagetagsTestWithMockData):
+    def test_get_by_id(self):
+        with self.app.app_context():
+            post = Post.get_by_id(1)
+
+            self.assertIsNotNone(post)
+            self.assertEqual(post.id, 1)
+            self.assertEqual(post.title, "post1")
+            self.assertEqual(post.url.url, "http://www.example.com/page_1")
+
+
 if __name__ == "__main__":
     main()

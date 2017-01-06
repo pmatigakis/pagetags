@@ -159,3 +159,25 @@ class UrlResource(Resource):
             "page": args.page,
             "per_page": args.per_page
         }
+
+
+class PostResource(Resource):
+    @jwt_required()
+    def get(self, post_id):
+        post = models.Post.get_by_id(post_id)
+
+        if post is None:
+            abort(
+                404,
+                error="post doesn't exist",
+                post_id=post_id,
+                error_code=error_codes.POST_DOES_NOT_EXIST
+            )
+
+        return {
+            "id": post.id,
+            "url": post.url.url,
+            "title": post.title,
+            "added_at": post.added_at.isoformat(sep=" "),
+            "tags": sorted([tag.name for tag in post.tags])
+        }
