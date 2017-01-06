@@ -164,14 +164,60 @@ class UrlResource(Resource):
 class PostResource(Resource):
     @jwt_required()
     def get(self, post_id):
+        current_app.logger.info("retrieving post: post_id(%d)", post_id)
+
         post = models.Post.get_by_id(post_id)
 
         if post is None:
+            msg = "post doesn't exist: post_id(%d)"
+            current_app.logger.warning(msg, post_id)
+
             abort(
                 404,
                 error="post doesn't exist",
                 post_id=post_id,
                 error_code=error_codes.POST_DOES_NOT_EXIST
+            )
+
+        return {
+            "id": post.id,
+            "url": post.url.url,
+            "title": post.title,
+            "added_at": post.added_at.isoformat(sep=" "),
+            "tags": sorted([tag.name for tag in post.tags])
+        }
+
+    @jwt_required()
+    def put(self, post_id):
+        args = reqparsers.post.parse_args()
+
+        msg = "updating post: post_id(%d) title(%s) url(%s) tags(%s)"
+        current_app.logger.info(
+            msg, post_id, args.title, args.url, ",".join(args.tags))
+
+        post = models.Post.get_by_id(post_id)
+
+        if post is None:
+            msg = "post doesn't exist: post_id(%d)"
+            current_app.logger.warning(msg, post_id)
+
+            abort(
+                404,
+                error="post doesn't exist",
+                post_id=post_id,
+                error_code=error_codes.POST_DOES_NOT_EXIST
+            )
+
+        post.update(args.title, args.url, args.tags)
+
+        try:
+            db.session.commit()
+        except SQLAlchemyError:
+            abort(
+                404,
+                error="failed to update post",
+                post_id=post_id,
+                error_code=error_codes.POST_UPDATE_DATABASE_ERROR
             )
 
         return {

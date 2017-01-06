@@ -417,5 +417,30 @@ class PostRetrievalTests(PagetagsTestWithMockData):
             self.assertEqual(post.url.url, "http://www.example.com/page_1")
 
 
+class PostUpdateTests(PagetagsTestWithMockData):
+    def test_update(self):
+        with self.app.app_context():
+            post = Post.get_by_id(1)
+
+            title = "new post1 title"
+            url = "http://www.example_1.com/new_post1_url"
+            tags = ["tag1000", "tag2000"]
+
+            post.update(title, url, tags)
+
+            try:
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+                self.fail("failed to update post")
+
+            post = Post.get_by_id(1)
+
+            self.assertEqual(post.id, 1)
+            self.assertEqual(post.title, title)
+            self.assertEqual(post.url.url, url)
+            self.assertItemsEqual([tag.name for tag in post.tags], tags)
+
+
 if __name__ == "__main__":
     main()

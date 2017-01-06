@@ -674,5 +674,41 @@ class PostRetrievalTests(PagetagsTestWithMockData):
         )
 
 
+class PostUpdateTests(PagetagsTestWithMockData):
+    def test_update(self):
+        token = self.authenticate(
+            self.test_user_username, self.test_user_password)
+
+        new_data = {
+            "title": "new post1 title",
+            "url": "http://www.example_1.com/new_post1_url",
+            "tags": ["tag1111", "tag2222"]
+        }
+
+        response = self.client.put(
+            "/api/v1/post/1",
+            headers={
+                "Authorization": "JWT %s" % token,
+                "Content-Type": "application/json"
+            },
+            data=json.dumps(new_data)
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        data = json.loads(response.data)
+
+        self.assertDictEqual(
+            data,
+            {
+                'id': 1,
+                'title': 'new post1 title',
+                'tags': ['tag1111', 'tag2222'],
+                'url': 'http://www.example_1.com/new_post1_url',
+                'added_at': '2016-10-05 12:30:00'
+            }
+        )
+
+
 if __name__ == "__main__":
     main()

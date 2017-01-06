@@ -273,5 +273,16 @@ class Post(db.Model):
 
         return title
 
+    def update(self, title, url, tags):
+        self.title = title
+
+        url_object = Url.get_or_create(url)
+
+        self.url = url_object
+
+        tag_collection = [Tag.get_or_create(tag) for tag in tags]
+
+        self.tags = tag_collection
+
     def __unicode__(self):
         return self.title
