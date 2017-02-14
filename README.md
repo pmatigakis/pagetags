@@ -61,158 +61,16 @@ pagetags runserver
 Open [http://localhost:5000/login](http://localhost:5000/login) and enter your credentions
 in order to login. After that you will be redirected to the main page.
 
+# Documentation
+
+Use Sphinx to build the documentation
+
+```
+cd docs
+make html
+```
+
 # API
 
-Pagetags has a REST API that can be used to access the saved posts.
-
-## Authentication
-
-All API endpoints require authentication. [JWT](https://jwt.io/) is used as the
-authentication mechanism. All requests must contain the following header.
-
-```
-Authorization: JWT your.token.here
-```
-
-
-### POST /auth
-
-Create a JWT token
-
-Request Body
-
-```javascript
-{
-    "username": "user1",
-    "password": "user1password"
-}
-```
-
-Response
-```javascript
-{
-    "access_token": "aaaa.bbb.cccc"
-}
-```
-
-### GET /api/v1/tags
-
-Returns the saved tags
-
-Response
-
-```javascript
-["tag1", "tag2", "tag3"]
-```
-
-### Get /api/v1/tag/\<tag\>[?page=\<page\>]
-
-Returns the posts for this tag
-
-Response
-
-```javascript
-{
-    "has_more": false,
-    "page": 1,
-    "per_page": 10,
-    "posts": [
-        {
-            "id": 123,
-            "title": "post title",
-            "url": "http://www.example.com/page_1",
-            "tags": ["tag1", "tag2"],
-            "added_at": "2016/03/21 12:20:00"
-        },
-        {
-            "id": 122,
-            "title": "post title",
-            "url": "http://www.example.com/page_2",
-            "tags": ["tag1", "tag3"],
-            "added_at": "2016/03/21 11:00:00"
-        },
-    ] 
-}
-```
-
-### Get /api/v1/url/url=\<url\>[?page=\<page\>]
-
-Returns the posts for this url
-
-Response
-
-```javascript
-{
-    "has_more": false,
-    "page": 1,
-    "per_page": 10,
-    "posts": [
-        {
-            "id": 123,
-            "title": "post title",
-            "url": "http://www.example.com/page_1",
-            "tags": ["tag1", "tag2"],
-            "added_at": "2016/03/21 12:20:00"
-        },
-        {
-            "id": 122,
-            "title": "post title",
-            "url": "http://www.example.com/page_2",
-            "tags": ["tag1", "tag3"],
-            "added_at": "2016/03/21 11:00:00"
-        },
-    ] 
-}
-```
-
-### POST /api/v1/posts
-
-Add a new post
-
-Request body
-
-```javascript
-{
-    "title": "page title",
-    "url": "http://www.example.com/page_1",
-    "tags": ["tag1", "tag2"]
-}
-```
-
-Response
-
-```javascript
-{
-    "id": 123
-}
-```
-
-### GET /api/v1/posts[?page=\<page\>]
-
-Get the latest posts
-
-Response
-
-```javascript
-{
-    "has_more": false,
-    "page": 1,
-    "per_page": 10,
-    "posts": [
-        {
-            "id": 123,
-            "title": "post title",
-            "url": "http://www.example.com/page_1",
-            "tags": ["tag1", "tag2"],
-            "added_at": "2016/03/21 12:20:00"
-        },
-        {
-            "id": 122,
-            "title": "post title",
-            "url": "http://www.example.com/page_2",
-            "tags": ["tag1", "tag3"],
-            "added_at": "2016/03/21 11:00:00"
-        },
-    ] 
-}
-```
+Pagetags has a REST api that can be used to add and retrieve posts. More
+details can be found in the `Pagetags API` section of the documentation.
