@@ -2,9 +2,9 @@ from setuptools import setup, find_packages
 
 setup(
     name = "Pagetags",
-    version = "0.1",
+    version = "0.1.0",
     packages = find_packages(exclude=["tests"]),
-    install_requires = [
+    install_requires=[
         "Flask==0.11.1",
         "Flask-Script==2.0.5",
         "Flask-SQLAlchemy==2.1",
@@ -29,7 +29,7 @@ setup(
     test_suite = 'nose.collector',
     entry_points={
         'console_scripts': [
-            'pagetags = pagetags.cli:main',
+            'pagetags=pagetags.cli:main',
         ]
     }
 )
