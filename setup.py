@@ -29,7 +29,7 @@ setup(
     test_suite = 'nose.collector',
     entry_points={
         'console_scripts': [
-            'pagetags=pagetags.cli:main',
+            'pagetags=pagetags.cli.commands:main',
         ]
     }
 )
