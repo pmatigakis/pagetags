@@ -798,5 +798,24 @@ class PostUpdateTests(PagetagsTestWithMockData):
         )
 
 
+class APITokenTests(PagetagsTestWithMockData):
+    def test_token_can_be_used_in_the_request_arguments(self):
+        token = self.authenticate(
+            self.test_user_username, self.test_user_password)
+
+        params = {
+            "api_key": token
+        }
+
+        response = self.client.get("api/v1/tags", query_string=params)
+
+        self.assertEqual(response.status_code, 200)
+
+        response = json.loads(response.data)
+
+        self.assertItemsEqual(response,
+                              ["tag1", "tag2", "tag3", "tag4", "tag5"])
+
+
 if __name__ == "__main__":
     main()

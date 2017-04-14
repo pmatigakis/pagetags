@@ -1,6 +1,7 @@
-from flask_jwt import _default_jwt_payload_handler
+from flask_jwt import _default_jwt_payload_handler, _default_request_handler
 import arrow
 import jwt
+from flask import request
 
 from pagetags.models import User, db
 
@@ -51,3 +52,9 @@ def create_token(user_id, jti, secret, algorithm, expires_at=None):
     payload = create_token_payload(user_id, jti, expires_at)
 
     return jwt.encode(payload, secret, algorithm)
+
+
+def request_handler():
+    token = request.args.get("api_key")
+
+    return token or _default_request_handler()
