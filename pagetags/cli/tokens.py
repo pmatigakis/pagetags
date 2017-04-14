@@ -1,9 +1,8 @@
 from flask_script import Command, Option
 from flask import current_app
-import jwt
 
 from pagetags.models import User
-from pagetags.authentication import create_token_payload
+from pagetags.authentication import create_token
 
 
 class CreateToken(Command):
@@ -23,8 +22,6 @@ class CreateToken(Command):
             print("Unknown user {}".format(username))
             return
 
-        payload = create_token_payload(user.id, user.jti, expires_at)
-
-        token = jwt.encode(payload, secret, algorithm)
+        token = create_token(user.id, user.jti, secret, algorithm, expires_at)
 
         print(token)

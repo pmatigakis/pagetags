@@ -1,5 +1,6 @@
 from flask_jwt import _default_jwt_payload_handler
 import arrow
+import jwt
 
 from pagetags.models import User, db
 
@@ -44,3 +45,9 @@ def create_token_payload(user_id, jti, expires_at=None):
         payload["exp"] = exp.timestamp
 
     return payload
+
+
+def create_token(user_id, jti, secret, algorithm, expires_at=None):
+    payload = create_token_payload(user_id, jti, expires_at)
+
+    return jwt.encode(payload, secret, algorithm)

@@ -3,7 +3,8 @@ from unittest import main, TestCase
 import arrow
 
 from pagetags.models import User
-from pagetags.authentication import payload_handler, create_token_payload
+from pagetags.authentication import (payload_handler, create_token_payload,
+                                     create_token)
 
 from common import PagetagsTestWithMockData
 
@@ -85,6 +86,31 @@ class TokenPayloadCreationTests(TestCase):
                 "exp": expiration_time.timestamp
             }
         )
+
+    def test_create_token_without_expiration_date(self):
+        user_id = 123
+        jti = "abcd"
+
+        token = create_token(user_id, jti, "secret", "HS256")
+
+        self.assertIsInstance(token, str)
+        self.assertTrue(len(token), 0)
+
+    def test_create_token_with_expiration_date(self):
+        user_id = 123
+        jti = "abcd"
+        expiration_time = arrow.utcnow().replace(days=1)
+
+        token = create_token(
+            user_id=user_id,
+            jti=jti,
+            secret="secret",
+            algorithm="HS256",
+            expires_at=expiration_time.strftime("%Y/%m/%d %H:%M:%S")
+        )
+
+        self.assertIsInstance(token, str)
+        self.assertTrue(len(token), 0)
 
 
 if __name__ == "__main__":
