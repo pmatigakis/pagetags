@@ -7,7 +7,7 @@ from flask_admin import Admin
 
 from pagetags import login_manager
 from pagetags.models import db, Post
-from pagetags.views import index, new_url, tag, login, logout, tags
+from pagetags.views import posts, tags, authentication
 from pagetags.authentication import (load_user, authenticate, identity,
                                      payload_handler)
 from pagetags.api import (TagsResource, TagPostsResource, PostsResource,
@@ -76,12 +76,14 @@ def create_app(settings_file, environment_type=None):
     login_manager.user_callback = load_user
     login_manager.login_view = "login"
 
-    app.add_url_rule("/", view_func=index)
-    app.add_url_rule("/new_url", view_func=new_url, methods=["GET", "POST"])
-    app.add_url_rule("/tag/<name>", view_func=tag)
-    app.add_url_rule("/tags", view_func=tags)
-    app.add_url_rule("/login", view_func=login, methods=["GET", "POST"])
-    app.add_url_rule("/logout", view_func=logout)
+    app.add_url_rule("/", view_func=posts.index)
+    app.add_url_rule(
+        "/new_url", view_func=posts.new_url, methods=["GET", "POST"])
+    app.add_url_rule("/tag/<name>", view_func=tags.tag)
+    app.add_url_rule("/tags", view_func=tags.tags)
+    app.add_url_rule(
+        "/login", view_func=authentication.login, methods=["GET", "POST"])
+    app.add_url_rule("/logout", view_func=authentication.logout)
 
     api = Api(app)
 
