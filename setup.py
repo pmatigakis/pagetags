@@ -17,7 +17,9 @@ setup(
         "Flask-Admin==1.4.2",
         "uWSGI==2.0.14",
         "Sphinx==1.5.2",
-        "sphinxcontrib-httpdomain==1.5.0"
+        "sphinxcontrib-httpdomain==1.5.0",
+        "PyJWT==1.4.2",
+        "arrow==0.10.0"
     ],
     include_package_data=True,
     zip_safe=False,

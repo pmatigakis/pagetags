@@ -3,7 +3,7 @@ import os
 from flask_script import Manager
 
 from pagetags.main import create_app
-from pagetags.cli import users, database
+from pagetags.cli import users, database, tokens
 
 
 def main():
@@ -18,9 +18,12 @@ def main():
     users_manager.add_command("change_password", users.ChangeUserPassword())
     users_manager.add_command("list", users.ListUsers())
 
+    tokens_manager = Manager(help="Token management commands")
+    tokens_manager.add_command("create", tokens.CreateToken())
+
     manager = Manager(app)
     manager.add_command("initdb", database.InitDB())
-
     manager.add_command("users", users_manager)
+    manager.add_command("tokens", tokens_manager)
 
     manager.run()
