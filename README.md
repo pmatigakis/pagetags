@@ -74,3 +74,5 @@ make html
 
 Pagetags has a REST api that can be used to add and retrieve posts. More
 details can be found in the `Pagetags API` section of the documentation.
+
+A Swagger documentation page is also available at `/api/spec.html`
