@@ -19,7 +19,8 @@ setup(
         "Sphinx==1.5.2",
         "sphinxcontrib-httpdomain==1.5.0",
         "PyJWT==1.4.2",
-        "arrow==0.10.0"
+        "arrow==0.10.0",
+        "flask-restful-swagger==0.19"
     ],
     include_package_data=True,
     zip_safe=False,

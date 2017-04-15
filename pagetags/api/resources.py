@@ -2,11 +2,27 @@ from flask_restful import Resource, abort
 from flask_jwt import jwt_required
 from sqlalchemy.exc import SQLAlchemyError
 from flask import current_app
+from flask_restful_swagger import swagger
+from flask_restful import fields
 
 from pagetags import models, db, reqparsers, error_codes
+from pagetags.api.models import (TagPosts, NewPost, CreatedPost, Posts, Post,
+                                 UpdatePost, UpdatedPost)
 
 
 class TagsResource(Resource):
+    """Tags"""
+
+    @swagger.operation(
+        nickname='tags',
+        notes='Retrieve the available tags',
+        responseMessages=[
+            {
+                "code": 200,
+                "message": "retrieved the available tags"
+            }
+        ]
+    )
     @jwt_required()
     def get(self):
         msg = "retrieving available tags"
@@ -18,6 +34,33 @@ class TagsResource(Resource):
 
 
 class TagPostsResource(Resource):
+    """Tag posts"""
+
+    @swagger.operation(
+        nickname='tag_posts',
+        notes='Retrieve the tag posts',
+        parameters=[
+            {
+                "name": "tag",
+                "description": "The tag to use",
+                "required": True,
+                "allowMultiple": False,
+                "dataType": fields.String.__name__,
+                "paramType": "path"
+            }
+        ],
+        responseClass=TagPosts.__name__,
+        responseMessages=[
+            {
+                "code": 200,
+                "message": "retrieved the tag posts"
+            },
+            {
+                "code": 404,
+                "message": "tag doesn't exist"
+            }
+        ]
+    )
     @jwt_required()
     def get(self, tag):
         tag_object = models.Tag.get_by_name(tag)
@@ -61,6 +104,29 @@ class TagPostsResource(Resource):
 
 
 class PostsResource(Resource):
+    """Posts"""
+
+    @swagger.operation(
+        nickname='create_post',
+        notes='Create a post',
+        responseClass=CreatedPost.__name__,
+        parameters=[
+            {
+                "name": "body",
+                "description": "The new post",
+                "required": True,
+                "allowMultiple": False,
+                "dataType": NewPost.__name__,
+                "paramType": "body"
+            }
+        ],
+        responseMessages=[
+            {
+                "code": 200,
+                "message": "created the new post"
+            }
+        ]
+    )
     @jwt_required()
     def post(self):
         args = reqparsers.post.parse_args()
@@ -90,6 +156,35 @@ class PostsResource(Resource):
 
         return {"id": post.id}
 
+    @swagger.operation(
+        nickname='posts',
+        notes='Get the posts',
+        responseClass=Posts.__name__,
+        parameters=[
+            {
+                "name": "page",
+                "description": "The page to retrieve",
+                "required": False,
+                "allowMultiple": False,
+                "dataType": fields.Integer.__name__,
+                "paramType": "query"
+            },
+            {
+                "name": "per_page",
+                "description": "The posts per page",
+                "required": False,
+                "allowMultiple": False,
+                "dataType": fields.Integer.__name__,
+                "paramType": "query"
+            }
+        ],
+        responseMessages=[
+            {
+                "code": 200,
+                "message": "Retrieved the posts"
+            }
+        ]
+    )
     @jwt_required()
     def get(self):
         args = reqparsers.posts.parse_args()
@@ -120,6 +215,49 @@ class PostsResource(Resource):
 
 
 class UrlResource(Resource):
+    """Urls"""
+
+    @swagger.operation(
+        nickname='url_posts',
+        notes='Get the posts for a url',
+        responseClass=Posts.__name__,
+        parameters=[
+            {
+                "name": "url",
+                "description": "The url for which to retrieve the posts",
+                "required": True,
+                "allowMultiple": False,
+                "dataType": fields.String.__name__,
+                "paramType": "query"
+            },
+            {
+                "name": "page",
+                "description": "The page to retrieve",
+                "required": False,
+                "allowMultiple": False,
+                "dataType": fields.Integer.__name__,
+                "paramType": "query"
+            },
+            {
+                "name": "per_page",
+                "description": "The posts per page",
+                "required": False,
+                "allowMultiple": False,
+                "dataType": fields.Integer.__name__,
+                "paramType": "query"
+            }
+        ],
+        responseMessages=[
+            {
+                "code": 200,
+                "message": "Retrieved the posts"
+            },
+            {
+                "code": 404,
+                "message": "Url doesn't exist"
+            }
+        ]
+    )
     @jwt_required()
     def get(self):
         args = reqparsers.url_query.parse_args()
@@ -162,6 +300,33 @@ class UrlResource(Resource):
 
 
 class PostResource(Resource):
+    """Post"""
+
+    @swagger.operation(
+        nickname='post',
+        notes='Get the post with the given id',
+        responseClass=Post.__name__,
+        parameters=[
+            {
+                "name": "post_id",
+                "description": "The post id",
+                "required": True,
+                "allowMultiple": False,
+                "dataType": fields.Integer.__name__,
+                "paramType": "path"
+            }
+        ],
+        responseMessages=[
+            {
+                "code": 200,
+                "message": "Retrieved the post"
+            },
+            {
+                "code": 404,
+                "message": "The post doesn't exist"
+            }
+        ]
+    )
     @jwt_required()
     def get(self, post_id):
         current_app.logger.info("retrieving post: post_id(%d)", post_id)
@@ -187,6 +352,31 @@ class PostResource(Resource):
             "tags": sorted([tag.name for tag in post.tags])
         }
 
+    @swagger.operation(
+        nickname='update_post',
+        notes='Update the post with the given id',
+        responseClass=UpdatedPost.__name__,
+        parameters=[
+            {
+                "name": "body",
+                "description": "The post contents",
+                "required": True,
+                "allowMultiple": False,
+                "dataType": UpdatePost.__name__,
+                "paramType": "body"
+            }
+        ],
+        responseMessages=[
+            {
+                "code": 200,
+                "message": "Updated the post"
+            },
+            {
+                "code": 404,
+                "message": "The post doesn't exist"
+            }
+        ]
+    )
     @jwt_required()
     def put(self, post_id):
         args = reqparsers.post.parse_args()

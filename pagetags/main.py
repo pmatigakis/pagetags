@@ -4,14 +4,15 @@ from logging.handlers import RotatingFileHandler
 from flask import Flask
 from flask_restful import Api
 from flask_admin import Admin
+from flask_restful_swagger import swagger
 
 from pagetags import login_manager
 from pagetags.models import db, Post
 from pagetags.views import posts, tags, authentication
 from pagetags.authentication import (load_user, authenticate, identity,
                                      payload_handler, request_handler)
-from pagetags.api import (TagsResource, TagPostsResource, PostsResource,
-                          UrlResource, PostResource)
+from pagetags.api.resources import (TagsResource, TagPostsResource,
+                                    PostsResource, UrlResource, PostResource)
 from pagetags import jwt
 from pagetags.admin import (AuthenticatedModelView, UserModelView,
                             AuthenticatedIndexView, TagModelView, UrlModelView)
@@ -85,7 +86,7 @@ def create_app(settings_file, environment_type=None):
         "/login", view_func=authentication.login, methods=["GET", "POST"])
     app.add_url_rule("/logout", view_func=authentication.logout)
 
-    api = Api(app)
+    api = swagger.docs(Api(app), apiVersion="1")
 
     api.add_resource(TagsResource, "/api/v1/tags")
     api.add_resource(TagPostsResource, "/api/v1/tag/<tag>")

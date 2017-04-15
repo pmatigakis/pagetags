@@ -324,7 +324,7 @@ class PostApiTests(PagetagsTestWithMockData):
                 u'url': u'The url length is over the maximum allowed'}}
         )
 
-    @patch("pagetags.api.db.session.commit")
+    @patch("pagetags.api.resources.db.session.commit")
     def test_fail_to_add_post_when_database_commit_fails(self, commit_mock):
         commit_mock.side_effect = SQLAlchemyError
 
@@ -763,7 +763,7 @@ class PostUpdateTests(PagetagsTestWithMockData):
             }
         )
 
-    @patch("pagetags.api.db.session.commit")
+    @patch("pagetags.api.resources.db.session.commit")
     def test_fail_to_update_post_when_database_commit_fails(self, commit_mock):
         commit_mock.side_effect = SQLAlchemyError
 
