@@ -4,6 +4,7 @@ from flask_restful import fields
 
 @swagger.model
 class Post(object):
+    required = ["id", "title", "url", "added_at", "tags"]
     resource_fields = {
         "id": fields.Integer,
         "title": fields.String,
@@ -16,6 +17,7 @@ class Post(object):
 @swagger.model
 @swagger.nested(posts=Post.__name__)
 class TagPosts(object):
+    required = ["tag_id", "posts", "has_more", "page", "per_page"]
     resource_fields = {
         "tag_id": fields.Integer,
         "posts": fields.List(fields.Nested(Post.resource_fields)),
@@ -27,6 +29,7 @@ class TagPosts(object):
 
 @swagger.model
 class NewPost(object):
+    required = ["title", "url", "tags"]
     resource_fields = {
         "title": fields.String,
         "url": fields.String,
@@ -36,6 +39,7 @@ class NewPost(object):
 
 @swagger.model
 class CreatedPost(object):
+    required = ["id"]
     resource_fields = {
         "id": fields.Integer
     }
@@ -44,6 +48,7 @@ class CreatedPost(object):
 @swagger.model
 @swagger.nested(posts=Post.__name__)
 class Posts(object):
+    required = ["posts", "has_more", "page", "per_page"]
     resource_fields = {
         "posts": fields.List(fields.Nested(Post.resource_fields)),
         "has_more": fields.Boolean,
@@ -54,6 +59,7 @@ class Posts(object):
 
 @swagger.model
 class UpdatePost(object):
+    required = ["title", "url", "tags"]
     resource_fields = {
         "title": fields.String,
         "url": fields.String,
@@ -63,6 +69,7 @@ class UpdatePost(object):
 
 @swagger.model
 class UpdatedPost(object):
+    required = ["id", "title", "urls", "tags", "added_at"]
     resource_fields = {
         "id": fields.Integer,
         "title": fields.String,
