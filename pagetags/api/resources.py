@@ -3,11 +3,11 @@ from flask_jwt import jwt_required
 from sqlalchemy.exc import SQLAlchemyError
 from flask import current_app
 from flask_restful_swagger import swagger
-from flask_restful import fields
+from flask_restful import fields, marshal_with
 
 from pagetags import models, db, reqparsers, error_codes
 from pagetags.api.models import (TagPosts, NewPost, CreatedPost, Posts, Post,
-                                 UpdatePost, UpdatedPost)
+                                 UpdatePost, UpdatedPost, URLPosts)
 
 
 class TagsResource(Resource):
@@ -61,6 +61,7 @@ class TagPostsResource(Resource):
             }
         ]
     )
+    @marshal_with(TagPosts.resource_fields)
     @jwt_required()
     def get(self, tag):
         tag_object = models.Tag.get_by_name(tag)
@@ -89,7 +90,7 @@ class TagPostsResource(Resource):
                 "title": post.title,
                 "url": post.url.url,
                 "tags": post.tag_names(),
-                "added_at": post.added_at.strftime("%Y/%m/%d %H:%M:%S")
+                "added_at": post.added_at
             }
             for post in paginator.items
         ]
@@ -127,6 +128,7 @@ class PostsResource(Resource):
             }
         ]
     )
+    @marshal_with(CreatedPost.resource_fields)
     @jwt_required()
     def post(self):
         args = reqparsers.post.parse_args()
@@ -220,7 +222,7 @@ class UrlResource(Resource):
     @swagger.operation(
         nickname='url_posts',
         notes='Get the posts for a url',
-        responseClass=Posts.__name__,
+        responseClass=URLPosts.__name__,
         parameters=[
             {
                 "name": "url",
@@ -258,6 +260,7 @@ class UrlResource(Resource):
             }
         ]
     )
+    @marshal_with(URLPosts.resource_fields)
     @jwt_required()
     def get(self):
         args = reqparsers.url_query.parse_args()
@@ -285,7 +288,7 @@ class UrlResource(Resource):
                 "title": post.title,
                 "url": args.url,
                 "tags": post.tag_names(),
-                "added_at": post.added_at.strftime("%Y/%m/%d %H:%M:%S")
+                "added_at": post.added_at
             }
             for post in paginator.items
         ]
@@ -327,6 +330,7 @@ class PostResource(Resource):
             }
         ]
     )
+    @marshal_with(Post.resource_fields)
     @jwt_required()
     def get(self, post_id):
         current_app.logger.info("retrieving post: post_id(%d)", post_id)
@@ -348,7 +352,7 @@ class PostResource(Resource):
             "id": post.id,
             "url": post.url.url,
             "title": post.title,
-            "added_at": post.added_at.isoformat(sep=" "),
+            "added_at": post.added_at,
             "tags": sorted([tag.name for tag in post.tags])
         }
 
@@ -377,6 +381,7 @@ class PostResource(Resource):
             }
         ]
     )
+    @marshal_with(UpdatedPost.resource_fields)
     @jwt_required()
     def put(self, post_id):
         args = reqparsers.post.parse_args()
@@ -419,6 +424,6 @@ class PostResource(Resource):
             "id": post.id,
             "url": post.url.url,
             "title": post.title,
-            "added_at": post.added_at.isoformat(sep=" "),
+            "added_at": post.added_at,
             "tags": sorted([tag.name for tag in post.tags])
         }

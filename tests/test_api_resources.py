@@ -662,6 +662,10 @@ class PostRetrievalTests(PagetagsTestWithMockData):
 
         data = json.loads(response.data)
 
+        self.assertIn("added_at", data)
+        self.assertIsNotNone(data["added_at"])
+        added_at = data["added_at"]
+
         self.assertDictEqual(
             data,
             {
@@ -669,7 +673,7 @@ class PostRetrievalTests(PagetagsTestWithMockData):
                 'title': 'post1',
                 'tags': ['tag1', 'tag2'],
                 'url': 'http://www.example.com/page_1',
-                'added_at': '2016-10-05 12:30:00'
+                'added_at': added_at
             }
         )
 
@@ -720,6 +724,11 @@ class PostUpdateTests(PagetagsTestWithMockData):
 
         data = json.loads(response.data)
 
+        self.assertIn("added_at", data)
+        self.assertIsNotNone(data["added_at"])
+
+        added_at = data["added_at"]
+
         self.assertDictEqual(
             data,
             {
@@ -727,7 +736,7 @@ class PostUpdateTests(PagetagsTestWithMockData):
                 'title': 'new post1 title',
                 'tags': ['tag1111', 'tag2222'],
                 'url': 'http://www.example_1.com/new_post1_url',
-                'added_at': '2016-10-05 12:30:00'
+                'added_at': added_at
             }
         )
 

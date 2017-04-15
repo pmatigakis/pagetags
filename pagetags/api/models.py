@@ -58,6 +58,19 @@ class Posts(object):
 
 
 @swagger.model
+@swagger.nested(posts=Post.__name__)
+class URLPosts(object):
+    required = ["url_id", "posts", "has_more", "page", "per_page"]
+    resource_fields = {
+        "url_id": fields.Integer,
+        "posts": fields.List(fields.Nested(Post.resource_fields)),
+        "has_more": fields.Boolean,
+        "page": fields.Integer,
+        "per_page": fields.Integer
+    }
+
+
+@swagger.model
 class UpdatePost(object):
     required = ["title", "url", "tags"]
     resource_fields = {
