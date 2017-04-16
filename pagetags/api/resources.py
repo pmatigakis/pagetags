@@ -7,7 +7,7 @@ from flask_restful import fields, marshal_with
 
 from pagetags import models, db, reqparsers, error_codes
 from pagetags.api.models import (TagPosts, NewPost, CreatedPost, Posts, Post,
-                                 UpdatePost, UpdatedPost, URLPosts)
+                                 UpdatePost, UpdatedPost, URLPosts, Tags)
 
 
 class TagsResource(Resource):
@@ -16,6 +16,7 @@ class TagsResource(Resource):
     @swagger.operation(
         nickname='tags',
         notes='Retrieve the available tags',
+        responseClass=Tags.__name__,
         responseMessages=[
             {
                 "code": 200,
@@ -23,6 +24,7 @@ class TagsResource(Resource):
             }
         ]
     )
+    @marshal_with(Tags.resource_fields)
     @jwt_required()
     def get(self):
         msg = "retrieving available tags"
@@ -30,7 +32,9 @@ class TagsResource(Resource):
 
         tags = db.session.query(models.Tag).all()
 
-        return [tag.name for tag in tags]
+        return {
+            "tags": [tag.name for tag in tags]
+        }
 
 
 class TagPostsResource(Resource):

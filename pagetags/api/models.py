@@ -90,3 +90,11 @@ class UpdatedPost(object):
         "tags": fields.List(fields.String),
         "added_at": fields.DateTime
     }
+
+
+@swagger.model
+class Tags(object):
+    required = ["tags"]
+    resource_fields = {
+        "tags": fields.List(fields.String)
+    }
