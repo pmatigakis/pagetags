@@ -227,6 +227,7 @@ class Post(db.Model):
 
     url = db.relationship("Url", back_populates="posts")
     tags = db.relationship('Tag', secondary=post_tags, back_populates="posts")
+    categories = db.relationship("PostCategory", back_populates="post")
 
     @classmethod
     def create(cls, title, url, tags):
@@ -286,3 +287,41 @@ class Post(db.Model):
 
     def __unicode__(self):
         return self.title
+
+
+class Category(db.Model):
+    __tablename__ = "categories"
+
+    __table_args__ = (
+        db.PrimaryKeyConstraint("id", name="pk_categories"),
+        db.UniqueConstraint("name", name="uq_categories__name")
+    )
+
+    id = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String(40), nullable=False)
+    added_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    posts = db.relationship("PostCategory", back_populates="category")
+
+
+class PostCategory(db.Model):
+    __tablename__ = "post_categories"
+
+    __table_args__ = (
+        db.PrimaryKeyConstraint("post_id", "category_id", name="pk_post_categories"),
+        db.ForeignKeyConstraint(
+            ["post_id"], ["posts.id"],
+            name="fk_post_categories__post_id__posts"
+        ),
+        db.ForeignKeyConstraint(
+            ["category_id"], ["categories.id"],
+            name="fk_post_categories__category_id__categories"
+        ),
+    )
+
+    post_id = db.Column(db.Integer, nullable=False)
+    category_id = db.Column(db.Integer, nullable=False)
+    assigned_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    post = db.relationship("Post", back_populates="categories")
+    category = db.relationship("Category", back_populates="posts")
