@@ -32,7 +32,8 @@ def new_url():
         msg = u"adding post: title({}) - url({}) - tags({})"
         current_app.logger.info(msg.format(title, url, ','.join(tags)))
 
-        posting = models.Post.create(title, url, tags)
+        # TODO: set the post categories
+        posting = models.Post.create(title, url, tags, [])
 
         try:
             db.session.commit()

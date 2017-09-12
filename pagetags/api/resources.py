@@ -140,7 +140,8 @@ class PostsResource(Resource):
         msg = "adding post: title(%s) url(%s) tags(%s)"
         current_app.logger.info(msg, args.title, args.url, ",".join(args.tags))
 
-        post = models.Post.create(args.title, args.url, args.tags)
+        # TODo: set the post categories
+        post = models.Post.create(args.title, args.url, args.tags, [])
 
         try:
             db.session.commit()

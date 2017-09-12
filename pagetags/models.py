@@ -230,7 +230,7 @@ class Post(db.Model):
     categories = db.relationship("Category", secondary="post_categories")
 
     @classmethod
-    def create(cls, title, url, tags):
+    def create(cls, title, url, tags, categories):
         url_object = Url.get_or_create(url)
 
         tag_collection = [Tag.get_or_create(tag) for tag in tags]
@@ -239,7 +239,8 @@ class Post(db.Model):
             title=title,
             url=url_object,
             tags=tag_collection,
-            added_at=datetime.utcnow()
+            added_at=datetime.utcnow(),
+            categories=categories
         )
 
         db.session.add(post)

@@ -92,22 +92,22 @@ class PagetagsTestWithMockData(PagetagsTestsWithUser):
 
         with self.app.app_context():
             post1 = Post.create("post1", "http://www.example.com/page_1",
-                                ["tag1", "tag2"])
+                                ["tag1", "tag2"], [])
             post1.added_at = datetime(2016, 10, 5, 12, 30, 0)
             post1.id = 1
 
             post2 = Post.create("post2", "http://www.example.com/page_1",
-                                ["tag1", "tag3"])
+                                ["tag1", "tag3"], [])
             post2.added_at = datetime(2016, 10, 5, 12, 31, 0)
             post2.id = 2
 
             post3 = Post.create("post3", "http://www.example.com/page_1",
-                                ["tag1", "tag4"])
+                                ["tag1", "tag4"], [])
             post3.added_at = datetime(2016, 10, 5, 12, 32, 0)
             post3.id = 3
 
             post4 = Post.create("post4", "http://www.example.com/page_2",
-                                ["tag1", "tag2", "tag5"])
+                                ["tag1", "tag2", "tag5"], [])
             post4.added_at = datetime(2016, 10, 5, 12, 33, 0)
             post4.id = 4
 

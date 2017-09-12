@@ -269,10 +269,13 @@ class UrlCreationTests(PagetagsTest):
 class PostCreationTests(PagetagsTest):
     def test_create_posting(self):
         with self.app.app_context():
+            category = Category.create("category_1")
+
             post = Post.create(
                 "post title",
                 "http://www.example.com",
-                ["tag1", "tag2"]
+                ["tag1", "tag2"],
+                [category]
             )
 
             self.assertIsNotNone(post)
@@ -282,6 +285,10 @@ class PostCreationTests(PagetagsTest):
             self.assertItemsEqual(
                 [tag.name for tag in post.tags],
                 ["tag1", "tag2"]
+            )
+            self.assertItemsEqual(
+                [category_object.name for category_object in post.categories],
+                ["category_1"]
             )
 
             try:
@@ -294,10 +301,13 @@ class PostCreationTests(PagetagsTest):
 
     def test_post_name_tags(self):
         with self.app.app_context():
+            category = Category.create("category_1")
+
             post = Post.create(
                 "post title",
                 "http://www.example.com",
-                ["tag1", "tag2"]
+                ["tag1", "tag2"],
+                [category]
             )
 
             try:
@@ -310,24 +320,30 @@ class PostCreationTests(PagetagsTest):
 
     def test_fail_to_create_post_with_empty_title(self):
         with self.app.app_context():
+            category = Category.create("category_1")
+
             self.assertRaises(
                 ValueError,
                 Post.create,
                 "",
                 "http://www.google.com",
-                ["tag1", "tag2"]
+                ["tag1", "tag2"],
+                [category]
             )
 
     def test_fail_to_create_post_with_large_title_field(self):
         large_title = "a" * (Post.TITLE_LENGTH + 1)
 
         with self.app.app_context():
+            category = Category.create("category_1")
+
             self.assertRaises(
                 ValueError,
                 Post.create,
                 large_title,
                 "http://www.google.com",
-                ["tag1", "tag2"]
+                ["tag1", "tag2"],
+                [category]
             )
 
 
