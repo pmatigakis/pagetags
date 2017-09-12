@@ -227,7 +227,7 @@ class Post(db.Model):
 
     url = db.relationship("Url", back_populates="posts")
     tags = db.relationship('Tag', secondary=post_tags, back_populates="posts")
-    categories = db.relationship("PostCategory", back_populates="post")
+    categories = db.relationship("Category", secondary="post_categories")
 
     @classmethod
     def create(cls, title, url, tags):
@@ -301,14 +301,28 @@ class Category(db.Model):
     name = db.Column(db.String(40), nullable=False)
     added_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    posts = db.relationship("PostCategory", back_populates="category")
+    posts = db.relationship("Post", secondary="post_categories")
+
+    @classmethod
+    def create(cls, name):
+        category = cls(
+            name=name,
+            added_at=datetime.now()
+        )
+
+        db.session.add(category)
+
+        return category
 
 
 class PostCategory(db.Model):
     __tablename__ = "post_categories"
 
     __table_args__ = (
-        db.PrimaryKeyConstraint("post_id", "category_id", name="pk_post_categories"),
+        db.PrimaryKeyConstraint(
+            "post_id", "category_id",
+            name="pk_post_categories"
+        ),
         db.ForeignKeyConstraint(
             ["post_id"], ["posts.id"],
             name="fk_post_categories__post_id__posts"
@@ -321,7 +335,19 @@ class PostCategory(db.Model):
 
     post_id = db.Column(db.Integer, nullable=False)
     category_id = db.Column(db.Integer, nullable=False)
-    assigned_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    assigned_at = db.Column(
+        db.DateTime, nullable=False, default=datetime.utcnow)
 
-    post = db.relationship("Post", back_populates="categories")
-    category = db.relationship("Category", back_populates="posts")
+    post = db.relationship("Post", backref="post_categories")
+    category = db.relationship("Category", backref="post_categories")
+
+    @classmethod
+    def create(cls, post, category):
+        post_category = cls(
+            post=post,
+            category=category
+        )
+
+        db.session.add(post_category)
+
+        return post_category

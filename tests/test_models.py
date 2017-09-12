@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from werkzeug.security import check_password_hash
 from flask_sqlalchemy import Pagination
 
-from pagetags.models import User, Tag, Post, Url
+from pagetags.models import User, Tag, Post, Url, Category, PostCategory
 from pagetags import db
 
 from common import PagetagsTest, PagetagsTestWithMockData
@@ -440,6 +440,96 @@ class PostUpdateTests(PagetagsTestWithMockData):
             self.assertEqual(post.title, title)
             self.assertEqual(post.url.url, url)
             self.assertItemsEqual([tag.name for tag in post.tags], tags)
+
+    def test_change_the_category_of_a_post(self):
+        with self.app.app_context():
+            post = db.session.query(Post).get(1)
+            category = db.session.query(Category).get(2)
+
+            post.categories = [category]
+
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to update the post categories")
+
+            post = db.session.query(Post).get(1)
+            self.assertEqual(len(post.categories), 1)
+            self.assertEqual(post.categories[0].name, "category_2")
+
+    def test_change_the_category_of_a_post_using_post_cetegory_object(self):
+        with self.app.app_context():
+            post = db.session.query(Post).get(1)
+            category = db.session.query(Category).get(2)
+
+            PostCategory.create(post=post, category=category)
+
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to update the post categories")
+
+            post = db.session.query(Post).get(1)
+            self.assertEqual(len(post.categories), 1)
+            self.assertEqual(post.categories[0].name, "category_2")
+
+
+class CategoryTests(PagetagsTest):
+    def test_create_category(self):
+        with self.app.app_context():
+            category = Category.create("category_1")
+
+            self.assertIsNone(category.id)
+
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to create category object")
+
+            self.assertIsNotNone(category.id)
+
+    def test_fail_to_create_categories_with_the_same_name(self):
+        with self.app.app_context():
+            Category.create("category_1")
+
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to create category object")
+
+            Category.create("category_1")
+
+            self.assertRaises(IntegrityError, db.session.commit)
+
+
+class PostCategoryTests(PagetagsTestWithMockData):
+    def test_create_post_category(self):
+        with self.app.app_context():
+            category = db.session.query(Category).get(1)
+            post = db.session.query(Post).get(1)
+
+            post_category = PostCategory.create(post=post, category=category)
+
+            db.session.add(post_category)
+
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to create post category object")
+
+            self.assertEqual(len(post.categories), 1)
+            self.assertItemsEqual(
+                ["category_1"],
+                [
+                    post_category_object.name
+                    for post_category_object in post.categories
+                ]
+            )
 
 
 if __name__ == "__main__":

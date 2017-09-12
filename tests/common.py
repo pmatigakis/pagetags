@@ -7,7 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from pagetags.main import create_app
 from pagetags import db
-from pagetags.models import User, Post
+from pagetags.models import User, Post, Category, PostCategory
 
 
 class PagetagsTest(TestCase):
@@ -110,6 +110,21 @@ class PagetagsTestWithMockData(PagetagsTestsWithUser):
                                 ["tag1", "tag2", "tag5"])
             post4.added_at = datetime(2016, 10, 5, 12, 33, 0)
             post4.id = 4
+
+            category1 = Category.create("category_1")
+            category1.id = 1
+            category1.added_at = datetime(2016, 10, 1, 12, 0, 0)
+
+            category2 = Category.create("category_2")
+            category2.id = 2
+            category2.added_at = datetime(2016, 10, 2, 12, 0, 0)
+
+            post_category = PostCategory(
+                post=post4,
+                category=category1
+            )
+
+            db.session.add(post_category)
 
             try:
                 db.session.commit()
