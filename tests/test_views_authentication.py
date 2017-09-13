@@ -21,7 +21,6 @@ class LoginTests(PagetagsTestsWithUser):
                                follow_redirects=True)
 
         self.assertIn("<title>PageTags</title>", response.data)
-        self.assertIn("New URL", response.data)
         self.assertIn("Logout", response.data)
 
     def test_login_then_logout(self):
@@ -39,7 +38,6 @@ class LoginTests(PagetagsTestsWithUser):
                                     follow_redirects=True)
 
         self.assertIn("<title>PageTags</title>", response.data)
-        self.assertIn("New URL", response.data)
         self.assertIn("Logout", response.data)
 
         response = self.client.get("/logout", follow_redirects=True)

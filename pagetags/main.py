@@ -79,8 +79,6 @@ def create_app(settings_file, environment_type=None):
     login_manager.login_view = "login"
 
     app.add_url_rule("/", view_func=posts.index)
-    app.add_url_rule(
-        "/new_url", view_func=posts.new_url, methods=["GET", "POST"])
     app.add_url_rule("/tag/<name>", view_func=tags.tag)
     app.add_url_rule("/tags", view_func=tags.tags)
     app.add_url_rule(
