@@ -9,6 +9,7 @@ post.add_argument("title", required=True, location="json",
 post.add_argument("url", required=True, location="json",
                   type=argtypes.post_url)
 post.add_argument("tags", required=True, type=list, location="json")
+post.add_argument("categories", required=True, type=list, location="json")
 
 
 url_query = RequestParser()
@@ -30,3 +31,11 @@ tag_posts.add_argument("per_page", default=10, type=int, location="args")
 tags_posts = RequestParser()
 tags_posts.add_argument("page", default=1, type=int, location="args")
 tags_posts.add_argument("per_page", default=10, type=int, location="args")
+
+
+update_post = RequestParser()
+update_post.add_argument(
+    "title", required=True, location="json", type=argtypes.post_title)
+update_post.add_argument(
+    "url", required=True, location="json", type=argtypes.post_url)
+update_post.add_argument("tags", required=True, type=list, location="json")

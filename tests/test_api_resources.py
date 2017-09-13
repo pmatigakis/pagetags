@@ -202,7 +202,8 @@ class PostApiTests(PagetagsTestWithMockData):
         posting = {
             "title": "posting title",
             "url": "http://www.example.com",
-            "tags": ["tag1", "tag2"]
+            "tags": ["tag1", "tag2"],
+            "categories": ["category_1"]
         }
 
         response = self.client.post(
@@ -338,7 +339,8 @@ class PostApiTests(PagetagsTestWithMockData):
         posting = {
             "title": "posting title",
             "url": "http://www.example.com",
-            "tags": ["tag1", "tag2"]
+            "tags": ["tag1", "tag2"],
+            "categories": ["category_1"]
         }
 
         response = self.client.post(
@@ -658,7 +660,7 @@ class PostRetrievalTests(PagetagsTestWithMockData):
             self.test_user_username, self.test_user_password)
 
         response = self.client.get(
-            "/api/v1/post/1",
+            "/api/v1/post/4",
             headers={"Authorization": "JWT %s" % token}
         )
 
@@ -673,11 +675,12 @@ class PostRetrievalTests(PagetagsTestWithMockData):
         self.assertDictEqual(
             data,
             {
-                'id': 1,
-                'title': 'post1',
-                'tags': ['tag1', 'tag2'],
-                'url': 'http://www.example.com/page_1',
-                'added_at': added_at
+                'id': 4,
+                'title': 'post4',
+                'tags': ["tag1", "tag2", "tag5"],
+                'url': 'http://www.example.com/page_2',
+                'added_at': added_at,
+                "categories": ["category_1"]
             }
         )
 
@@ -716,7 +719,7 @@ class PostUpdateTests(PagetagsTestWithMockData):
         }
 
         response = self.client.put(
-            "/api/v1/post/1",
+            "/api/v1/post/4",
             headers={
                 "Authorization": "JWT %s" % token,
                 "Content-Type": "application/json"
@@ -736,9 +739,10 @@ class PostUpdateTests(PagetagsTestWithMockData):
         self.assertDictEqual(
             data,
             {
-                'id': 1,
+                'id': 4,
                 'title': 'new post1 title',
                 'tags': ['tag1111', 'tag2222'],
+                "categories": ["category_1"],
                 'url': 'http://www.example_1.com/new_post1_url',
                 'added_at': added_at
             }

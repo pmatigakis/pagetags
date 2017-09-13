@@ -141,7 +141,8 @@ class PostsResource(Resource):
         current_app.logger.info(msg, args.title, args.url, ",".join(args.tags))
 
         # TODo: set the post categories
-        post = models.Post.create(args.title, args.url, args.tags, [])
+        post = models.Post.create(
+            args.title, args.url, args.tags, args.categories)
 
         try:
             db.session.commit()
@@ -358,7 +359,9 @@ class PostResource(Resource):
             "url": post.url.url,
             "title": post.title,
             "added_at": post.added_at,
-            "tags": sorted([tag.name for tag in post.tags])
+            "tags": sorted([tag.name for tag in post.tags]),
+            "categories":
+                sorted([category.name for category in post.categories])
         }
 
     @swagger.operation(
@@ -389,7 +392,7 @@ class PostResource(Resource):
     @marshal_with(UpdatedPost.resource_fields)
     @jwt_required()
     def put(self, post_id):
-        args = reqparsers.post.parse_args()
+        args = reqparsers.update_post.parse_args()
 
         msg = "updating post: post_id(%d) title(%s) url(%s) tags(%s)"
         current_app.logger.info(
@@ -430,5 +433,7 @@ class PostResource(Resource):
             "url": post.url.url,
             "title": post.title,
             "added_at": post.added_at,
-            "tags": sorted([tag.name for tag in post.tags])
+            "tags": sorted([tag.name for tag in post.tags]),
+            "categories":
+                sorted([category.name for category in post.categories])
         }

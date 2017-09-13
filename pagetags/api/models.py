@@ -4,12 +4,13 @@ from flask_restful import fields
 
 @swagger.model
 class Post(object):
-    required = ["id", "title", "url", "added_at", "tags"]
+    required = ["id", "title", "url", "added_at", "tags", "categories"]
     resource_fields = {
         "id": fields.Integer,
         "title": fields.String,
         "url": fields.String,
         "tags": fields.List(fields.String),
+        "categories": fields.List(fields.String),
         "added_at": fields.DateTime
     }
 
@@ -29,11 +30,12 @@ class TagPosts(object):
 
 @swagger.model
 class NewPost(object):
-    required = ["title", "url", "tags"]
+    required = ["title", "url", "tags", "categories"]
     resource_fields = {
         "title": fields.String,
         "url": fields.String,
-        "tags": fields.List(fields.String)
+        "tags": fields.List(fields.String),
+        "categories": fields.List(fields.String)
     }
 
 
@@ -82,12 +84,13 @@ class UpdatePost(object):
 
 @swagger.model
 class UpdatedPost(object):
-    required = ["id", "title", "urls", "tags", "added_at"]
+    required = ["id", "title", "urls", "tags", "added_at", "categories"]
     resource_fields = {
         "id": fields.Integer,
         "title": fields.String,
         "url": fields.String,
         "tags": fields.List(fields.String),
+        "categories": fields.List(fields.String),
         "added_at": fields.DateTime
     }
 

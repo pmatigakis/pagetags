@@ -17,12 +17,14 @@ class PostArgumentParserTests(TestCase):
                 data=json.dumps(
                     {"title": "hello world",
                      "url": "http://www.example.com",
-                     "tags": ["tag1", "tag2"]})):
+                     "tags": ["tag1", "tag2"],
+                     "categories": ["category_1"]})):
             args = reqparsers.post.parse_args()
 
             self.assertEqual(args.title, "hello world")
             self.assertEqual(args.url, "http://www.example.com")
             self.assertItemsEqual(args.tags, ["tag1", "tag2"])
+            self.assertItemsEqual(args.categories, ["category_1"])
 
 
 if __name__ == "__main__":
