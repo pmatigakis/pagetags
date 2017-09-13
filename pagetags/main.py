@@ -15,7 +15,8 @@ from pagetags.api.resources import (TagsResource, TagPostsResource,
                                     PostsResource, UrlResource, PostResource)
 from pagetags import jwt
 from pagetags.admin import (UserModelView, AuthenticatedIndexView,
-                            TagModelView, UrlModelView, PostModelView)
+                            TagModelView, UrlModelView, PostModelView,
+                            CategoryModelView)
 
 
 def initialize_logging(app):
@@ -106,5 +107,6 @@ def create_app(settings_file, environment_type=None):
     admin.add_view(UrlModelView(db.session))
     admin.add_view(PostModelView(db.session))
     admin.add_view(UserModelView(db.session))
+    admin.add_view(CategoryModelView(db.session))
 
     return app

@@ -3,7 +3,7 @@ from flask_admin import AdminIndexView, expose
 from flask_login import current_user
 from flask import redirect, url_for
 
-from pagetags.models import User, Tag, Url, Post
+from pagetags.models import User, Tag, Url, Post, Category
 
 
 class AuthenticatedModelView(ModelView):
@@ -57,3 +57,11 @@ class PostModelView(AuthenticatedModelView):
 
     def __init__(self, session, *args, **kwargs):
         super(PostModelView, self).__init__(Post, session, *args, **kwargs)
+
+
+class CategoryModelView(AuthenticatedModelView):
+    form_columns = ["name"]
+
+    def __init__(self, session, *args, **kwargs):
+        super(CategoryModelView, self).__init__(
+            Category, session, *args, **kwargs)
