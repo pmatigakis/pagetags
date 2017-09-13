@@ -234,13 +234,17 @@ class Post(db.Model):
         url_object = Url.get_or_create(url)
 
         tag_collection = [Tag.get_or_create(tag) for tag in tags]
+        category_collection = [
+            Category.get_or_create(category)
+            for category in categories
+        ]
 
         post = cls(
             title=title,
             url=url_object,
             tags=tag_collection,
             added_at=datetime.utcnow(),
-            categories=categories
+            categories=category_collection
         )
 
         db.session.add(post)
@@ -312,6 +316,15 @@ class Category(db.Model):
         )
 
         db.session.add(category)
+
+        return category
+
+    @classmethod
+    def get_or_create(cls, name):
+        category = db.session.query(cls).filter_by(name=name).one_or_none()
+
+        if category is None:
+            category = cls.create(name)
 
         return category
 

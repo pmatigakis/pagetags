@@ -269,13 +269,11 @@ class UrlCreationTests(PagetagsTest):
 class PostCreationTests(PagetagsTest):
     def test_create_posting(self):
         with self.app.app_context():
-            category = Category.create("category_1")
-
             post = Post.create(
                 "post title",
                 "http://www.example.com",
                 ["tag1", "tag2"],
-                [category]
+                ["category_1"]
             )
 
             self.assertIsNotNone(post)
@@ -301,13 +299,11 @@ class PostCreationTests(PagetagsTest):
 
     def test_post_name_tags(self):
         with self.app.app_context():
-            category = Category.create("category_1")
-
             post = Post.create(
                 "post title",
                 "http://www.example.com",
                 ["tag1", "tag2"],
-                [category]
+                ["category_1"]
             )
 
             try:
@@ -320,30 +316,26 @@ class PostCreationTests(PagetagsTest):
 
     def test_fail_to_create_post_with_empty_title(self):
         with self.app.app_context():
-            category = Category.create("category_1")
-
             self.assertRaises(
                 ValueError,
                 Post.create,
                 "",
                 "http://www.google.com",
                 ["tag1", "tag2"],
-                [category]
+                ["category_1"]
             )
 
     def test_fail_to_create_post_with_large_title_field(self):
         large_title = "a" * (Post.TITLE_LENGTH + 1)
 
         with self.app.app_context():
-            category = Category.create("category_1")
-
             self.assertRaises(
                 ValueError,
                 Post.create,
                 large_title,
                 "http://www.google.com",
                 ["tag1", "tag2"],
-                [category]
+                ["category_1"]
             )
 
 

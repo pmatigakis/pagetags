@@ -11,6 +11,7 @@ class Url(Form):
     url = StringField("url", validators=[DataRequired(), URL(),
                                          Length(max=Url.URL_LENGTH)])
     tags = StringField("tags", validators=[DataRequired()])
+    categories = StringField("categories", validators=[DataRequired()])
 
 
 class Login(Form):

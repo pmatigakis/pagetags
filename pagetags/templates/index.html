@@ -13,6 +13,9 @@
                             <li><a href="{{ post.url.url }}">{{ post.url.url }}</a></li>
                             <li>
                                 <ul class="tag_list">
+                                {% for category in post.categories %}
+                                    <li>{{ category.name }}</li>
+                                {% endfor %}
                                 {% for tag in post.tags %}
                                     <li><a href="{{ url_for('tag', name=tag.name) }}">{{ tag.name }}</a></li>
                                 {% endfor %}

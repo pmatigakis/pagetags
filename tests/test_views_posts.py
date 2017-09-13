@@ -13,7 +13,8 @@ class NewUrlViewTests(PagetagsTestsWithUser):
         request_data = {
             "title": "test url",
             "url": "http://www.example.com",
-            "tags": "tag1, tag2"
+            "tags": "tag1, tag2",
+            "categories": "category_1"
         }
 
         response = self.client.get("/new_url", follow_redirects=True)
@@ -136,7 +137,8 @@ class UrlUpdateTests(PagetagsTestWithMockData):
         request_data = {
             "title": "post5",
             "url": "http://www.example.com/page_3",
-            "tags": "tag1, tag6"
+            "tags": "tag1, tag6",
+            "categories": "category_1"
         }
 
         response = self.client.post("/new_url",
@@ -149,6 +151,7 @@ class UrlUpdateTests(PagetagsTestWithMockData):
         self.assertIn("tag1", response.data)
         self.assertIn("tag6", response.data)
         self.assertNotIn("tag7", response.data)
+        self.assertIn("category_1", response.data)
 
         self.logout()
 
