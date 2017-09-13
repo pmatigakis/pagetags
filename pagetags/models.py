@@ -152,7 +152,7 @@ class Url(db.Model):
 
     id = db.Column(db.Integer, nullable=False)
     url = db.Column(db.String(URL_LENGTH), nullable=False)
-    added_at = db.Column(db.DateTime, nullable=False)
+    added_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     posts = db.relationship("Post", back_populates="url")
 
@@ -223,7 +223,7 @@ class Post(db.Model):
     id = db.Column(db.Integer, nullable=False)
     url_id = db.Column(db.Integer, nullable=False)
     title = db.Column(db.String(TITLE_LENGTH), nullable=False)
-    added_at = db.Column(db.DateTime, nullable=False)
+    added_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     url = db.relationship("Url", back_populates="posts")
     tags = db.relationship('Tag', secondary=post_tags, back_populates="posts")
@@ -327,6 +327,9 @@ class Category(db.Model):
             category = cls.create(name)
 
         return category
+
+    def __unicode__(self):
+        return self.name
 
 
 class PostCategory(db.Model):
