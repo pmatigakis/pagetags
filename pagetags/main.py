@@ -85,6 +85,7 @@ def create_app(settings_file, environment_type=None):
         "/login", view_func=authentication.login, methods=["GET", "POST"])
     app.add_url_rule("/logout", view_func=authentication.logout)
     app.add_url_rule("/categories", view_func=categories.categories)
+    app.add_url_rule("/category/<name>", view_func=categories.category)
 
     api = swagger.docs(Api(app), apiVersion="1")
 

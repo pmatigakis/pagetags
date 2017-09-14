@@ -11,7 +11,7 @@
                 <tr><th>Category</th></tr>
                 {% for category in paginator.items %}
                     <tr>
-                        <td>{{ category.name }}</td>
+                        <td><a href="{{ url_for('category', name=category.name) }}">{{ category.name }}</a></td>
                     </tr>
                 {% endfor %}
             </table>

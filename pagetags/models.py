@@ -334,6 +334,16 @@ class Category(db.Model):
                   .order_by(db.desc(cls.name)) \
                   .paginate(page=page_num, per_page=per_page)
 
+    @classmethod
+    def get_by_name(cls, name):
+        return db.session.query(cls).filter_by(name=name).one_or_none()
+
+    def get_posts_by_page(self, page, per_page=10):
+        return Post.query\
+                   .filter(Post.categories.contains(self))\
+                   .order_by(db.desc(Post.added_at))\
+                   .paginate(page=page, per_page=per_page, error_out=False)
+
     def __unicode__(self):
         return self.name
 
