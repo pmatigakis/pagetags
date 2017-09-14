@@ -8,7 +8,7 @@ from flask_restful_swagger import swagger
 
 from pagetags import login_manager
 from pagetags.models import db
-from pagetags.views import posts, tags, authentication
+from pagetags.views import posts, tags, authentication, categories
 from pagetags.authentication import (load_user, authenticate, identity,
                                      payload_handler, request_handler)
 from pagetags.api.resources import (TagsResource, TagPostsResource,
@@ -84,6 +84,7 @@ def create_app(settings_file, environment_type=None):
     app.add_url_rule(
         "/login", view_func=authentication.login, methods=["GET", "POST"])
     app.add_url_rule("/logout", view_func=authentication.logout)
+    app.add_url_rule("/categories", view_func=categories.categories)
 
     api = swagger.docs(Api(app), apiVersion="1")
 

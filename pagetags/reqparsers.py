@@ -39,3 +39,9 @@ update_post.add_argument(
 update_post.add_argument(
     "url", required=True, location="json", type=argtypes.post_url)
 update_post.add_argument("tags", required=True, type=list, location="json")
+
+
+categories_posts = RequestParser()
+categories_posts.add_argument("page", default=1, type=int, location="args")
+categories_posts.add_argument(
+    "per_page", default=10, type=int, location="args")
