@@ -514,6 +514,53 @@ class CategoryTests(PagetagsTest):
             self.assertRaises(IntegrityError, db.session.commit)
 
 
+class CategoryRetrievalTests(PagetagsTest):
+    def setUp(self):
+        super(CategoryRetrievalTests, self).setUp()
+
+        with self.app.app_context():
+            for i in range(10):
+                Category.create("category_{}".format(i))
+
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to load mock data")
+
+    def get_by_page(self):
+        with self.app.app_context():
+            paginator = Category.get_by_page(page_num=1, per_page=3)
+
+            self.assertIsNotNone(paginator)
+
+            self.assertEqual(paginator.page, 1)
+            self.assertEqual(paginator.per_page, 3)
+
+            self.assertEqual(paginator.items[0].name, "category_9")
+            self.assertEqual(paginator.items[-1].name, "category_7")
+
+            paginator = Category.get_by_page(page_num=2, per_page=3)
+
+            self.assertIsNotNone(paginator)
+
+            self.assertEqual(paginator.page, 2)
+            self.assertEqual(paginator.per_page, 3)
+
+            self.assertEqual(paginator.items[0].name, "category_6")
+            self.assertEqual(paginator.items[-1].name, "category_4")
+
+            paginator = Category.get_by_page(page_num=4, per_page=3)
+
+            self.assertIsNotNone(paginator)
+
+            self.assertEqual(paginator.page, 4)
+            self.assertEqual(paginator.per_page, 3)
+
+            self.assertEqual(paginator.items[0].name, "category_0")
+            self.assertEqual(len(paginator.items), 1)
+
+
 class PostCategoryTests(PagetagsTestWithMockData):
     def test_create_post_category(self):
         with self.app.app_context():

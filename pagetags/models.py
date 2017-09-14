@@ -328,6 +328,12 @@ class Category(db.Model):
 
         return category
 
+    @classmethod
+    def get_by_page(cls, page_num, per_page=10):
+        return cls.query \
+                  .order_by(db.desc(cls.name)) \
+                  .paginate(page=page_num, per_page=per_page)
+
     def __unicode__(self):
         return self.name
 
