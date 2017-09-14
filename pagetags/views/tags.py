@@ -1,10 +1,8 @@
-from flask_login import login_required
 from flask import current_app, render_template
 
 from pagetags import models, reqparsers
 
 
-@login_required
 def tag(name):
     args = reqparsers.tag_posts.parse_args()
 
@@ -25,7 +23,6 @@ def tag(name):
     return render_template("tag.html", tag=tag_object, paginator=paginator)
 
 
-@login_required
 def tags():
     args = reqparsers.tags_posts.parse_args()
 

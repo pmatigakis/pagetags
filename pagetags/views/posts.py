@@ -1,10 +1,8 @@
-from flask_login import login_required
 from flask import current_app, render_template
 
 from pagetags import models, reqparsers
 
 
-@login_required
 def index():
     front_page_item_count = current_app.config["FRONT_PAGE_ITEM_COUNT"]
 

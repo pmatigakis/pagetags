@@ -38,17 +38,17 @@ class LoginTests(PagetagsTestsWithUser):
                                     follow_redirects=True)
 
         self.assertIn("<title>PageTags</title>", response.data)
-        self.assertIn("Logout", response.data)
+        self.assertIn('<a href="/logout">Logout</a>', response.data)
 
         response = self.client.get("/logout", follow_redirects=True)
 
         self.assertIn("<title>PageTags - Login</title>", response.data)
 
-    def test_redirect_to_login_page_when_not_logged_in(self):
+    def test_login_button_visible_when_logged_out(self):
         response = self.client.get("/", follow_redirects=True)
 
-        self.assertIn("<title>PageTags - Login</title>", response.data)
-        self.assertIn("<h1>Login</h1>", response.data)
+        self.assertIn("<title>PageTags</title>", response.data)
+        self.assertIn('<a href="/login">Login</a>', response.data)
 
     def test_fail_to_login_with_invalid_password(self):
         request_data = {
