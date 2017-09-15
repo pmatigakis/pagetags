@@ -5,10 +5,10 @@ from flask_jwt import jwt_required
 from pagetags.models import Category
 from pagetags import error_codes
 from pagetags import reqparsers
-from pagetags.api.models import CategoryPosts
+from pagetags.api.models import CategoryPosts, Categories
 
 
-class CategoryPortsResource(Resource):
+class CategoryPostsResource(Resource):
     @swagger.operation(
         nickname='category_posts',
         notes='Retrieve the category posts',
@@ -70,4 +70,28 @@ class CategoryPortsResource(Resource):
             "has_more": paginator.has_next,
             "page": args.page,
             "per_page": args.per_page
+        }
+
+
+class CategoriesResource(Resource):
+    @swagger.operation(
+        nickname='categories',
+        notes='Retrieve the available categories',
+        responseClass=Categories.__name__,
+        responseMessages=[
+            {
+                "code": 200,
+                "message": "retrieved the available tags"
+            }
+        ]
+    )
+    @marshal_with(Categories.resource_fields)
+    @jwt_required()
+    def get(self):
+        args = reqparsers.categories.parse_args()
+
+        paginator = Category.get_by_page(args.page, args.per_page)
+
+        return {
+            "categories": [category.name for category in paginator.items]
         }

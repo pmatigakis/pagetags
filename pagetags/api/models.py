@@ -118,3 +118,11 @@ class CategoryPosts(object):
         "page": fields.Integer,
         "per_page": fields.Integer
     }
+
+
+@swagger.model
+class Categories(object):
+    required = ["categories"]
+    resource_fields = {
+        "categories": fields.List(fields.String)
+    }

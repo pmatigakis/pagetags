@@ -50,3 +50,8 @@ categories_posts.add_argument(
 category_posts = RequestParser()
 category_posts.add_argument("page", default=1, type=int, location="args")
 category_posts.add_argument("per_page", default=10, type=int, location="args")
+
+
+categories = RequestParser()
+categories.add_argument("page", default=1, type=int, location="args")
+categories.add_argument("per_page", default=10, type=int, location="args")
