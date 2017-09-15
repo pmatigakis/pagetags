@@ -262,6 +262,11 @@ class Post(db.Model):
 
         return sorted(tags)
 
+    def category_names(self):
+        categories = [category.name for category in self.categories]
+
+        return sorted(categories)
+
     @classmethod
     def get_latest_by_page(cls, page, per_page=10):
         return cls.query\

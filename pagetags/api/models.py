@@ -101,3 +101,20 @@ class Tags(object):
     resource_fields = {
         "tags": fields.List(fields.String)
     }
+
+
+@swagger.model
+@swagger.nested(posts=Post.__name__)
+class CategoryPosts(object):
+    required = [
+        "category_id", "category", "posts", "has_more", "page", "per_page"
+    ]
+
+    resource_fields = {
+        "category_id": fields.Integer,
+        "category": fields.String,
+        "posts": fields.List(fields.Nested(Post.resource_fields)),
+        "has_more": fields.Boolean,
+        "page": fields.Integer,
+        "per_page": fields.Integer
+    }
