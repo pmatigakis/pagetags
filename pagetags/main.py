@@ -11,8 +11,7 @@ from pagetags.models import db
 from pagetags.views import posts, tags, authentication, categories
 from pagetags.authentication import (load_user, authenticate, identity,
                                      payload_handler, request_handler)
-from pagetags.api.resources import (TagsResource, TagPostsResource,
-                                    PostsResource, UrlResource, PostResource)
+from pagetags.api.routes import add_api_routes
 from pagetags import jwt
 from pagetags.admin import (UserModelView, AuthenticatedIndexView,
                             TagModelView, UrlModelView, PostModelView,
@@ -89,11 +88,7 @@ def create_app(settings_file, environment_type=None):
 
     api = swagger.docs(Api(app), apiVersion="1")
 
-    api.add_resource(TagsResource, "/api/v1/tags")
-    api.add_resource(TagPostsResource, "/api/v1/tag/<tag>")
-    api.add_resource(PostsResource, "/api/v1/posts")
-    api.add_resource(UrlResource, "/api/v1/url")
-    api.add_resource(PostResource, "/api/v1/post/<int:post_id>")
+    add_api_routes(api)
 
     jwt.authentication_callback = authenticate
     jwt.identity_callback = identity
