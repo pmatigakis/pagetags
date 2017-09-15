@@ -8,7 +8,6 @@ from flask_restful_swagger import swagger
 
 from pagetags import login_manager
 from pagetags.models import db
-from pagetags.views import posts, tags, authentication, categories
 from pagetags.authentication import (load_user, authenticate, identity,
                                      payload_handler, request_handler)
 from pagetags.api.routes import add_api_routes
@@ -16,6 +15,7 @@ from pagetags import jwt
 from pagetags.admin import (UserModelView, AuthenticatedIndexView,
                             TagModelView, UrlModelView, PostModelView,
                             CategoryModelView)
+from pagetags.views.routes import add_view_routes
 
 
 def initialize_logging(app):
@@ -77,17 +77,9 @@ def create_app(settings_file, environment_type=None):
     login_manager.user_callback = load_user
     login_manager.login_view = "login"
 
-    app.add_url_rule("/", view_func=posts.index)
-    app.add_url_rule("/tag/<name>", view_func=tags.tag)
-    app.add_url_rule("/tags", view_func=tags.tags)
-    app.add_url_rule(
-        "/login", view_func=authentication.login, methods=["GET", "POST"])
-    app.add_url_rule("/logout", view_func=authentication.logout)
-    app.add_url_rule("/categories", view_func=categories.categories)
-    app.add_url_rule("/category/<name>", view_func=categories.category)
+    add_view_routes(app)
 
     api = swagger.docs(Api(app), apiVersion="1")
-
     add_api_routes(api)
 
     jwt.authentication_callback = authenticate
