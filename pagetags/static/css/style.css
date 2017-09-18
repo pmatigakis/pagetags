@@ -1,22 +1,54 @@
-ul.post {
-    padding: 0em;
+ul.page_details {
+    padding: 0em 0em 0em 0em;
     margin: 0em 0em 1em 0em;
-}
-
-ul.post li {
     list-style-type: none;
-    padding: 0em;
-    margin: 0em;
 }
 
-ul.tag_list {
-    padding: 0em;
-    margin: 0em;
+ul.page_details li {
+    padding: 0em 0em 0em 0em;
+    margin: 0em 0em 0em 0em;
 }
 
-ul.tag_list li{
-    padding: 0em;
+ul.page_details li.title {
+    font-weight: bolder;
+    font-size: 1.5em;
+}
+
+ul.page_details li.title a {
+    text-decoration: none;
+}
+
+ul.page_details li.categories {
+    font-size: 1.2em;
+}
+
+ul.page_details li.summary {
+    font-style: italic;
+}
+
+ul.page_details li.url a {
+    text-decoration: none;
+    color: green;
+}
+
+ul.page_details li.info ul.info_details{
+    padding: 0em 0em 0em 0em;
+    margin: 0em 0em 0em 0em;
+    list-style-type: none;
+}
+
+ul.page_details li.info ul.info_details li{
+    padding: 0em 0em 0em 0em;
     margin: 0em 1em 0em 0em;
-    list-style-type: none;
     display: inline;
+}
+
+ul.page_details li.info ul.info_details li.submission_data{
+    color: grey;
+}
+
+
+table.wrap_content {
+    table-layout: fixed;
+    word-wrap: break-word;
 }

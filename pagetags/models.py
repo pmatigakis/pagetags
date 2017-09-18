@@ -343,6 +343,10 @@ class Category(db.Model):
     def get_by_name(cls, name):
         return db.session.query(cls).filter_by(name=name).one_or_none()
 
+    @classmethod
+    def all(cls):
+        return db.session.query(cls).order_by(cls.name).all()
+
     def get_posts_by_page(self, page, per_page=10):
         return Post.query\
                    .filter(Post.categories.contains(self))\

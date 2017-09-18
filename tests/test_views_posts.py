@@ -9,8 +9,6 @@ class FrontPageViewtests(PagetagsTestWithMockData):
 
         response = self.client.get("/")
 
-        self.assertIn("<a href=\"/logout\">Logout</a>", response.data)
-
         self.assertIn(
             "<a href=\"http://www.example.com/page_2\">post4</a>",
             response.data
@@ -31,14 +29,15 @@ class FrontPageViewtests(PagetagsTestWithMockData):
             response.data
         )
 
-        self.assertIn("<a href=\"/tag/tag1\">tag1</a>", response.data)
-        self.assertIn("<a href=\"/tag/tag3\">tag3</a>", response.data)
-        self.assertIn("<a href=\"/tag/tag4\">tag4</a>", response.data)
-        self.assertIn("<a href=\"/tag/tag5\">tag5</a>", response.data)
-        self.assertIn("<a href=\"/tag/tag2\">tag2</a>", response.data)
+        self.assertIn("tag1", response.data)
+        self.assertIn("tag3", response.data)
+        self.assertIn("tag4", response.data)
+        self.assertIn("tag5", response.data)
+        self.assertIn("tag2", response.data)
 
-        self.assertIn("<a href=\"/?page=2\">Next</a>", response.data)
-        self.assertNotIn("<a href=\"/?page=0\">Previous</a>", response.data)
+        self.assertIn("Next", response.data)
+        self.assertIn("/?page=2", response.data)
+        self.assertNotIn("Previous", response.data)
 
         self.logout()
 
@@ -46,8 +45,6 @@ class FrontPageViewtests(PagetagsTestWithMockData):
         self.login()
 
         response = self.client.get("/?page=2")
-
-        self.assertIn("<a href=\"/logout\">Logout</a>", response.data)
 
         self.assertNotIn(
             "post4",
@@ -69,14 +66,15 @@ class FrontPageViewtests(PagetagsTestWithMockData):
             response.data
         )
 
-        self.assertIn("<a href=\"/tag/tag1\">tag1</a>", response.data)
-        self.assertNotIn("<a href=\"/tag/tag3\">tag3</a>", response.data)
-        self.assertNotIn("<a href=\"/tag/tag4\">tag4</a>", response.data)
-        self.assertNotIn("<a href=\"/tag/tag5\">tag5</a>", response.data)
-        self.assertIn("<a href=\"/tag/tag2\">tag2</a>", response.data)
+        self.assertIn("tag1", response.data)
+        self.assertNotIn("tag3", response.data)
+        self.assertNotIn("tag4", response.data)
+        self.assertNotIn("tag5", response.data)
+        self.assertIn("tag2", response.data)
 
-        self.assertNotIn("<a href=\"/?page=2\">Next</a>", response.data)
-        self.assertIn("<a href=\"/?page=1\">Previous</a>", response.data)
+        self.assertNotIn("Next", response.data)
+        self.assertIn("Previous", response.data)
+        self.assertIn("/?page=1", response.data)
 
         self.logout()
 

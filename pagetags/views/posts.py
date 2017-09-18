@@ -14,4 +14,7 @@ def index():
     paginator = models.Post.get_latest_by_page(
         page=args.page, per_page=front_page_item_count)
 
-    return render_template("index.html", paginator=paginator)
+    return render_template(
+        "index.html",
+        paginator=paginator
+    )
