@@ -15,15 +15,8 @@ class TagViewTests(PagetagsTestWithMockData):
         self.assertIn("post3", response.data)
         self.assertNotIn("post2", response.data)
         self.assertNotIn("post1>", response.data)
-        self.assertNotIn(
-            "<a href=\"/tag/tag1?page=0\">Previous</a>",
-            response.data
-        )
-
-        self.assertIn(
-            "<a href=\"/tag/tag1?page=2\">Next</a>",
-            response.data
-        )
+        self.assertNotIn("Previous", response.data)
+        self.assertIn("Next", response.data)
 
         self.logout()
 
@@ -37,15 +30,8 @@ class TagViewTests(PagetagsTestWithMockData):
         self.assertIn("post2", response.data)
         self.assertNotIn("post3", response.data)
         self.assertNotIn("post4", response.data)
-        self.assertIn(
-            "<a href=\"/tag/tag1?page=1\">Previous</a>",
-            response.data
-        )
-
-        self.assertNotIn(
-            "<a href=\"/tag/tag1?page=2\">Next</a>",
-            response.data
-        )
+        self.assertIn("Previous", response.data)
+        self.assertNotIn("Next", response.data)
 
         self.logout()
 
@@ -70,15 +56,8 @@ class TagListViewTests(PagetagsTestWithMockData):
         self.assertIn("tag1", response.data)
         self.assertIn("tag2", response.data)
         self.assertNotIn("tag3", response.data)
-        self.assertNotIn(
-            "<a href=\"/tags?page=0\">Previous</a>",
-            response.data
-        )
-
-        self.assertIn(
-            "<a href=\"/tags?page=2\">Next</a>",
-            response.data
-        )
+        self.assertNotIn("Previous", response.data)
+        self.assertIn("Next", response.data)
 
         self.logout()
 
