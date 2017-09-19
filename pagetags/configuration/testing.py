@@ -1,5 +1,3 @@
 DEBUG = True
 TESTING = True
 WTF_CSRF_ENABLED = False
-
-ENABLE_LOGGING = False

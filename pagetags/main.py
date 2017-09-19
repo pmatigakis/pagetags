@@ -1,5 +1,4 @@
-import logging
-from logging.handlers import RotatingFileHandler
+import logging.config
 
 from flask import Flask
 from flask_restful import Api
@@ -11,29 +10,9 @@ from pagetags.extensions import initialize_extensions
 
 
 def initialize_logging(app):
-    log_file = app.config["LOG_FILE"]
-    log_file_size = app.config["LOG_FILE_SIZE"]
-    log_file_count = app.config["LOG_FILE_COUNT"]
-    log_level = app.config["LOG_LEVEL"]
-
-    log_format = "%(asctime)s %(levelname)s [%(process)d:%(thread)d] " \
-                 "%(name)s [%(pathname)s:%(funcName)s:%(lineno)d] %(message)s"
-    formatter = logging.Formatter(log_format)
-
-    handler = RotatingFileHandler(log_file,
-                                  maxBytes=log_file_size,
-                                  backupCount=log_file_count,
-                                  encoding="utf8")
-
-    handler.setFormatter(formatter)
-
-    app.logger.addHandler(handler)
-    if app.config["DEBUG"]:
-        handler.setLevel(logging.DEBUG)
-        app.logger.setLevel(logging.DEBUG)
-    else:
-        handler.setLevel(log_level)
-        app.logger.setLevel(log_level)
+    logging_configuration = app.config.get("LOGGING")
+    if logging_configuration is not None:
+        logging.config.dictConfig(logging_configuration)
 
 
 def create_app(settings_file, environment_type=None):
@@ -60,8 +39,7 @@ def create_app(settings_file, environment_type=None):
     app.config.from_object(environment_configurations[environment_type])
     app.config.from_pyfile(settings_file, silent=False)
 
-    if app.config["ENABLE_LOGGING"]:
-        initialize_logging(app)
+    initialize_logging(app)
 
     initialize_extensions(app)
     add_view_routes(app)
