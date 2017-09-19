@@ -13,7 +13,7 @@ class CreateUser(Command):
     )
 
     def run(self, username, password):
-        User.create(username, password)
+        User.create(db.session, username, password)
 
         db.session.commit()
 
@@ -26,7 +26,7 @@ class DeleteUser(Command):
     )
 
     def run(self, username):
-        User.delete(username)
+        User.delete(db.session, username)
 
         db.session.commit()
 
@@ -40,7 +40,7 @@ class ChangeUserPassword(Command):
     )
 
     def run(self, username, password):
-        user = User.get_by_username(username)
+        user = User.get_by_username(db.session, username)
 
         if user is None:
             print("Failed to change user pasword")

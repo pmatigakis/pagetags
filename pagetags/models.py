@@ -32,26 +32,26 @@ class User(UserMixin, db.Model):
     jti = db.Column(db.String(32), nullable=False)
 
     @classmethod
-    def create(cls, username, password):
+    def create(cls, session, username, password):
         user = cls(
             username=username,
             password=generate_password_hash(password),
             jti=uuid4().hex
         )
 
-        db.session.add(user)
+        session.add(user)
 
         return user
 
     @classmethod
-    def get_by_username(cls, username):
-        return db.session.query(cls).filter_by(username=username).one_or_none()
+    def get_by_username(cls, session, username):
+        return session.query(cls).filter_by(username=username).one_or_none()
 
     @classmethod
-    def delete(cls, username):
-        user = cls.get_by_username(username)
+    def delete(cls, session, username):
+        user = cls.get_by_username(session, username)
 
-        db.session.delete(user)
+        session.delete(user)
 
         return user
 
@@ -60,10 +60,10 @@ class User(UserMixin, db.Model):
         self.jti = uuid4().hex
 
     @classmethod
-    def authenticate(cls, username, password):
-        user = db.session.query(User)\
-                         .filter_by(username=username)\
-                         .one_or_none()
+    def authenticate(cls, session, username, password):
+        user = session.query(User)\
+                      .filter_by(username=username)\
+                      .one_or_none()
 
         if user and check_password_hash(user.password, password):
             return user
@@ -71,10 +71,10 @@ class User(UserMixin, db.Model):
         return None
 
     @classmethod
-    def authenticate_using_jti(cls, user_id, jti):
-        return db.session.query(User)\
-                         .filter_by(id=user_id, jti=jti)\
-                         .one_or_none()
+    def authenticate_using_jti(cls, session, user_id, jti):
+        return session.query(User)\
+                      .filter_by(id=user_id, jti=jti)\
+                      .one_or_none()
 
     def __unicode__(self):
         return self.username
@@ -94,28 +94,30 @@ class Tag(db.Model):
     posts = db.relationship('Post', secondary=post_tags, back_populates="tags")
 
     @classmethod
-    def get_by_name(cls, name):
-        return db.session.query(cls).filter_by(name=name).one_or_none()
+    def get_by_name(cls, session, name):
+        return session.query(cls).filter_by(name=name).one_or_none()
 
     @classmethod
-    def create(cls, name):
+    def create(cls, session, name):
         tag = cls(name=name)
 
-        db.session.add(tag)
+        session.add(tag)
 
         return tag
 
     @classmethod
-    def get_or_create(cls, name):
-        tag = cls.get_by_name(name)
+    def get_or_create(cls, session, name):
+        tag = cls.get_by_name(session, name)
 
         if tag is None:
-            tag = cls.create(name)
+            tag = cls.create(session, name)
 
         return tag
 
     @classmethod
     def get_tags_by_page(cls, page, per_page=10):
+        # TODO: pass the session as argument
+
         return cls.query\
                   .order_by(db.asc(cls.name))\
                   .paginate(page=page, per_page=per_page)
@@ -126,15 +128,15 @@ class Tag(db.Model):
                    .order_by(db.desc(Post.added_at))\
                    .paginate(page=page, per_page=per_page, error_out=False)
 
-    def get_posts(self):
-        return db.session.query(Post)\
-                         .filter(Post.tags.contains(self))\
-                         .all()
+    def get_posts(self, session):
+        return session.query(Post)\
+                      .filter(Post.tags.contains(self))\
+                      .all()
 
-    def post_count(self):
-        return db.session.query(Post) \
-                 .filter(Post.tags.contains(self)) \
-                 .count()
+    def post_count(self, session, ):
+        return session.query(Post) \
+                      .filter(Post.tags.contains(self)) \
+                      .count()
 
     def __unicode__(self):
         return self.name
@@ -157,42 +159,44 @@ class Url(db.Model):
     posts = db.relationship("Post", back_populates="url")
 
     @classmethod
-    def create(cls, url):
+    def create(cls, session, url):
         url_object = cls(url=url, added_at=datetime.utcnow())
 
-        db.session.add(url_object)
+        session.add(url_object)
 
         return url_object
 
     @classmethod
-    def get_by_url(cls, url):
-        return db.session.query(cls).filter_by(url=url).one_or_none()
+    def get_by_url(cls, session, url):
+        return session.query(cls).filter_by(url=url).one_or_none()
 
     @classmethod
-    def get_latest(cls, count=20):
-        return db.session.query(cls)\
-                         .order_by(db.desc(cls.added_at))\
-                         .limit(count)
+    def get_latest(cls, session, count=20):
+        return session.query(cls)\
+                      .order_by(db.desc(cls.added_at))\
+                      .limit(count)
 
     @classmethod
-    def get_or_create(cls, url):
-        url_object = cls.get_by_url(url)
+    def get_or_create(cls, session, url):
+        url_object = cls.get_by_url(session, url)
 
         if url_object is None:
-            url_object = cls.create(url)
+            url_object = cls.create(session, url)
 
         return url_object
 
     @classmethod
-    def get_posts(cls, url):
-        url_object = cls.get_by_url(url)
+    def get_posts(cls, session, url):
+        url_object = cls.get_by_url(session, url)
 
-        return db.session.query(Post)\
-                         .filter(Post.url == url_object)\
-                         .order_by(db.desc(Post.added_at))\
-                         .all()
+        return session.query(Post)\
+                      .filter(Post.url == url_object)\
+                      .order_by(db.desc(Post.added_at))\
+                      .all()
 
     def get_posts_by_page(self, page, per_page=10):
+        # TODO: pass the session as argument
+
         return Post.query\
                    .filter(Post.url == self)\
                    .order_by(db.desc(Post.added_at))\
@@ -230,12 +234,12 @@ class Post(db.Model):
     categories = db.relationship("Category", secondary="post_categories")
 
     @classmethod
-    def create(cls, title, url, tags, categories):
-        url_object = Url.get_or_create(url)
+    def create(cls, session, title, url, tags, categories):
+        url_object = Url.get_or_create(session, url)
 
-        tag_collection = [Tag.get_or_create(tag) for tag in tags]
+        tag_collection = [Tag.get_or_create(session, tag) for tag in tags]
         category_collection = [
-            Category.get_or_create(category)
+            Category.get_or_create(session, category)
             for category in categories
         ]
 
@@ -247,15 +251,15 @@ class Post(db.Model):
             categories=category_collection
         )
 
-        db.session.add(post)
+        session.add(post)
 
         return post
 
     @classmethod
-    def get_latest(cls, count=20):
-        return db.session.query(cls)\
-                         .order_by(db.desc(cls.added_at))\
-                         .limit(count)
+    def get_latest(cls, session, count=20):
+        return session.query(cls)\
+                      .order_by(db.desc(cls.added_at))\
+                      .limit(count)
 
     def tag_names(self):
         tags = [tag.name for tag in self.tags]
@@ -269,13 +273,15 @@ class Post(db.Model):
 
     @classmethod
     def get_latest_by_page(cls, page, per_page=10):
+        # TODO: pass the session as argument
+
         return cls.query\
                   .order_by(db.desc(cls.added_at))\
                   .paginate(page=page, per_page=per_page)
 
     @classmethod
-    def get_by_id(cls, post_id):
-        return db.session.query(cls).get(post_id)
+    def get_by_id(cls, session, post_id):
+        return session.query(cls).get(post_id)
 
     @validates("title")
     def validate_title(self, key, title):
@@ -284,14 +290,14 @@ class Post(db.Model):
 
         return title
 
-    def update(self, title, url, tags):
+    def update(self, session, title, url, tags):
         self.title = title
 
-        url_object = Url.get_or_create(url)
+        url_object = Url.get_or_create(session, url)
 
         self.url = url_object
 
-        tag_collection = [Tag.get_or_create(tag) for tag in tags]
+        tag_collection = [Tag.get_or_create(session, tag) for tag in tags]
 
         self.tags = tag_collection
 
@@ -314,40 +320,43 @@ class Category(db.Model):
     posts = db.relationship("Post", secondary="post_categories")
 
     @classmethod
-    def create(cls, name):
+    def create(cls, session, name):
         category = cls(
             name=name,
             added_at=datetime.now()
         )
 
-        db.session.add(category)
+        session.add(category)
 
         return category
 
     @classmethod
-    def get_or_create(cls, name):
-        category = db.session.query(cls).filter_by(name=name).one_or_none()
+    def get_or_create(cls, session, name):
+        category = session.query(cls).filter_by(name=name).one_or_none()
 
         if category is None:
-            category = cls.create(name)
+            category = cls.create(session, name)
 
         return category
 
     @classmethod
     def get_by_page(cls, page_num, per_page=10):
+        # TODO: pass the session as argument
         return cls.query \
                   .order_by(db.desc(cls.name)) \
                   .paginate(page=page_num, per_page=per_page)
 
     @classmethod
-    def get_by_name(cls, name):
-        return db.session.query(cls).filter_by(name=name).one_or_none()
+    def get_by_name(cls, session, name):
+        return session.query(cls).filter_by(name=name).one_or_none()
 
     @classmethod
-    def all(cls):
-        return db.session.query(cls).order_by(cls.name).all()
+    def all(cls, session):
+        return session.query(cls).order_by(cls.name).all()
 
     def get_posts_by_page(self, page, per_page=10):
+        # TODO: pass the session as argument
+
         return Post.query\
                    .filter(Post.categories.contains(self))\
                    .order_by(db.desc(Post.added_at))\
@@ -384,12 +393,12 @@ class PostCategory(db.Model):
     category = db.relationship("Category", backref="post_categories")
 
     @classmethod
-    def create(cls, post, category):
+    def create(cls, session, post, category):
         post_category = cls(
             post=post,
             category=category
         )
 
-        db.session.add(post_category)
+        session.add(post_category)
 
         return post_category

@@ -1,7 +1,7 @@
 from flask import render_template
 
 from pagetags import reqparsers
-from pagetags.models import Category
+from pagetags.models import db, Category
 
 
 def categories():
@@ -18,7 +18,7 @@ def categories():
 def category(name):
     args = reqparsers.category_posts.parse_args()
 
-    category_object = Category.get_by_name(name)
+    category_object = Category.get_by_name(db.session, name)
 
     if category_object is None:
         return render_template("404.html"), 404

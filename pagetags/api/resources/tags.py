@@ -66,7 +66,7 @@ class TagPostsResource(Resource):
     @marshal_with(TagPosts.resource_fields)
     @jwt_required()
     def get(self, tag):
-        tag_object = models.Tag.get_by_name(tag)
+        tag_object = models.Tag.get_by_name(db.session, tag)
 
         if tag_object is None:
             msg = "tag doesn't exist: tag(%s)"

@@ -72,7 +72,7 @@ class PagetagsTestsWithUser(PagetagsTest):
         super(PagetagsTestsWithUser, self).setUp()
 
         with self.app.app_context():
-            user = User.create("user1", "password")
+            user = User.create(db.session, "user1", "password")
 
             try:
                 db.session.commit()
@@ -91,40 +91,58 @@ class PagetagsTestWithMockData(PagetagsTestsWithUser):
         super(PagetagsTestWithMockData, self).setUp()
 
         with self.app.app_context():
-            post1 = Post.create("post1", "http://www.example.com/page_1",
-                                ["tag1", "tag2"], [])
+            post1 = Post.create(
+                db.session,
+                "post1", "http://www.example.com/page_1",
+                ["tag1", "tag2"],
+                []
+            )
             post1.added_at = datetime(2016, 10, 5, 12, 30, 0)
             post1.id = 1
 
-            post2 = Post.create("post2", "http://www.example.com/page_1",
-                                ["tag1", "tag3"], [])
+            post2 = Post.create(
+                db.session,
+                "post2",
+                "http://www.example.com/page_1",
+                ["tag1", "tag3"],
+                []
+            )
             post2.added_at = datetime(2016, 10, 5, 12, 31, 0)
             post2.id = 2
 
-            post3 = Post.create("post3", "http://www.example.com/page_1",
-                                ["tag1", "tag4"], [])
+            post3 = Post.create(
+                db.session,
+                "post3",
+                "http://www.example.com/page_1",
+                ["tag1", "tag4"],
+                []
+            )
             post3.added_at = datetime(2016, 10, 5, 12, 32, 0)
             post3.id = 3
 
-            post4 = Post.create("post4", "http://www.example.com/page_2",
-                                ["tag1", "tag2", "tag5"], [])
+            post4 = Post.create(
+                db.session,
+                "post4",
+                "http://www.example.com/page_2",
+                ["tag1", "tag2", "tag5"],
+                []
+            )
             post4.added_at = datetime(2016, 10, 5, 12, 33, 0)
             post4.id = 4
 
-            category1 = Category.create("category_1")
+            category1 = Category.create(db.session, "category_1")
             category1.id = 1
             category1.added_at = datetime(2016, 10, 1, 12, 0, 0)
 
-            category2 = Category.create("category_2")
+            category2 = Category.create(db.session, "category_2")
             category2.id = 2
             category2.added_at = datetime(2016, 10, 2, 12, 0, 0)
 
-            post_category = PostCategory(
+            PostCategory.create(
+                db.session,
                 post=post4,
                 category=category1
             )
-
-            db.session.add(post_category)
 
             try:
                 db.session.commit()

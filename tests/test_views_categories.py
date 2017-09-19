@@ -14,7 +14,7 @@ class CategoriesViewTests(PagetagsTest):
         with self.app.app_context():
             with self.app.app_context():
                 for i in range(25):
-                    Category.create("category_{}".format(i))
+                    Category.create(db.session, "category_{}".format(i))
 
                 try:
                     db.session.commit()

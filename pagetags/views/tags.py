@@ -1,6 +1,7 @@
 from flask import current_app, render_template
 
 from pagetags import models, reqparsers
+from pagetags.models import db
 
 
 def tag(name):
@@ -11,7 +12,7 @@ def tag(name):
     msg = u"listing posts for tag: tag({}) page({})"
     current_app.logger.info(msg.format(name, args.page))
 
-    tag_object = models.Tag.get_by_name(name)
+    tag_object = models.Tag.get_by_name(db.session, name)
 
     if tag_object is None:
         current_app.logger.warning(u"tag doesn't exist: tag({})".format(name))

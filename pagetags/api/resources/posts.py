@@ -45,7 +45,7 @@ class PostsResource(Resource):
 
         # TODo: set the post categories
         post = models.Post.create(
-            args.title, args.url, args.tags, args.categories)
+            db.session, args.title, args.url, args.tags, args.categories)
 
         try:
             db.session.commit()
@@ -158,7 +158,7 @@ class PostResource(Resource):
     def get(self, post_id):
         current_app.logger.info("retrieving post: post_id(%d)", post_id)
 
-        post = models.Post.get_by_id(post_id)
+        post = models.Post.get_by_id(db.session, post_id)
 
         if post is None:
             msg = "post doesn't exist: post_id(%d)"
@@ -215,7 +215,7 @@ class PostResource(Resource):
         current_app.logger.info(
             msg, post_id, args.title, args.url, ",".join(args.tags))
 
-        post = models.Post.get_by_id(post_id)
+        post = models.Post.get_by_id(db.session, post_id)
 
         if post is None:
             msg = "post doesn't exist: post_id(%d)"
@@ -228,7 +228,7 @@ class PostResource(Resource):
                 error_code=error_codes.POST_DOES_NOT_EXIST
             )
 
-        post.update(args.title, args.url, args.tags)
+        post.update(db.session, args.title, args.url, args.tags)
 
         try:
             db.session.commit()

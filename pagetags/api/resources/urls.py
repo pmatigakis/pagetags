@@ -6,6 +6,7 @@ from flask_restful import fields, marshal_with
 
 from pagetags import models, reqparsers, error_codes
 from pagetags.api.models import URLPosts
+from pagetags.models import db
 
 
 class UrlResource(Resource):
@@ -60,7 +61,7 @@ class UrlResource(Resource):
         msg = "retrieving posts for url: url(%s) page(%d) per_page(%d)"
         current_app.logger.info(msg, args.url, args.page, args.per_page)
 
-        url = models.Url.get_by_url(args.url)
+        url = models.Url.get_by_url(db.session, args.url)
 
         if url is None:
             msg = "url doesn't exist: url(%s)"

@@ -13,7 +13,7 @@ from common import PagetagsTest, PagetagsTestWithMockData
 class UserCreationModelTests(PagetagsTest):
     def test_create_user(self):
         with self.app.app_context():
-            user = User.create("user1", "password")
+            user = User.create(db.session, "user1", "password")
 
             self.assertIsNone(user.id)
             self.assertEqual(user.username, "user1")
@@ -30,7 +30,7 @@ class UserCreationModelTests(PagetagsTest):
 
     def test_fail_to_create_user_using_existing_username(self):
         with self.app.app_context():
-            User.create("user1", "password")
+            User.create(db.session, "user1", "password")
 
             try:
                 db.session.commit()
@@ -38,7 +38,7 @@ class UserCreationModelTests(PagetagsTest):
                 db.session.rollback()
                 self.fail("failed to commit transaction")
 
-            User.create("user1", "password")
+            User.create(db.session, "user1", "password")
 
             self.assertRaises(IntegrityError, db.session.commit)
 
@@ -46,7 +46,7 @@ class UserCreationModelTests(PagetagsTest):
 class UserRetrievalTests(PagetagsTestWithMockData):
     def test_get_user_by_username(self):
         with self.app.app_context():
-            user = User.get_by_username("user1")
+            user = User.get_by_username(db.session, "user1")
 
             self.assertIsNotNone(user)
             self.assertIsNotNone(user.id)
@@ -55,7 +55,7 @@ class UserRetrievalTests(PagetagsTestWithMockData):
 
     def test_fail_to_get_user_that_doesnt_exist(self):
         with self.app.app_context():
-            user = User.get_by_username("user2")
+            user = User.get_by_username(db.session, "user2")
 
             self.assertIsNone(user)
 
@@ -63,7 +63,7 @@ class UserRetrievalTests(PagetagsTestWithMockData):
 class UserDeletionTests(PagetagsTestWithMockData):
     def test_delete_user(self):
         with self.app.app_context():
-            user = User.delete("user1")
+            user = User.delete(db.session, "user1")
 
             self.assertIsNotNone(user)
             self.assertIsNotNone(user.id)
@@ -81,7 +81,7 @@ class UserDeletionTests(PagetagsTestWithMockData):
 class UserPasswordTests(PagetagsTestWithMockData):
     def test_change_user_password(self):
         with self.app.app_context():
-            user = User.get_by_username("user1")
+            user = User.get_by_username(db.session, "user1")
 
             user.change_password("password1")
 
@@ -91,7 +91,7 @@ class UserPasswordTests(PagetagsTestWithMockData):
                 db.session.rollback()
                 self.fail("failed to commit transaction")
 
-            user = User.get_by_username("user1")
+            user = User.get_by_username(db.session, "user1")
 
             self.assertTrue(check_password_hash(user.password, "password1"))
 
@@ -99,20 +99,22 @@ class UserPasswordTests(PagetagsTestWithMockData):
 class UserAuthenticationTests(PagetagsTestWithMockData):
     def test_authenticate(self):
         with self.app.app_context():
-            self.assertTrue(User.authenticate("user1", "password"))
+            self.assertTrue(User.authenticate(db.session, "user1", "password"))
 
     def test_fail_to_authenticate_with_invalid_password(self):
         with self.app.app_context():
-            self.assertFalse(User.authenticate("user1", "password1"))
+            self.assertFalse(
+                User.authenticate(db.session, "user1", "password1"))
 
     def test_fail_to_authenticate_unknown_user(self):
         with self.app.app_context():
-            self.assertFalse(User.authenticate("user2", "password"))
+            self.assertFalse(
+                User.authenticate(db.session, "user2", "password"))
 
     def test_authenticate_using_jti(self):
         with self.app.app_context():
             user = User.authenticate_using_jti(
-                self.test_user_id, self.test_user_jti)
+                db.session, self.test_user_id, self.test_user_jti)
 
             self.assertIsNotNone(user)
             self.assertEqual(user.id, self.test_user_id)
@@ -121,13 +123,14 @@ class UserAuthenticationTests(PagetagsTestWithMockData):
     def test_fail_to_authenticate_using_invalid_jti(self):
         with self.app.app_context():
             user = User.authenticate_using_jti(
-                self.test_user_id, "invalid-jti")
+                db.session, self.test_user_id, "invalid-jti")
 
             self.assertIsNone(user)
 
     def test_fail_to_authenticate_using_invalid_user_id(self):
         with self.app.app_context():
-            user = User.authenticate_using_jti(1234, self.test_user_jti)
+            user = User.authenticate_using_jti(
+                db.session, 1234, self.test_user_jti)
 
             self.assertIsNone(user)
 
@@ -135,7 +138,7 @@ class UserAuthenticationTests(PagetagsTestWithMockData):
 class TagCreationTests(PagetagsTest):
     def test_create_tag(self):
         with self.app.app_context():
-            tag = Tag.create("tag1")
+            tag = Tag.create(db.session, "tag1")
 
             self.assertIsNotNone(tag)
             self.assertIsNone(tag.id)
@@ -151,7 +154,7 @@ class TagCreationTests(PagetagsTest):
 
     def test_fail_to_create_duplicate_tag(self):
         with self.app.app_context():
-            Tag.create("tag1")
+            Tag.create(db.session, "tag1")
 
             try:
                 db.session.commit()
@@ -159,13 +162,13 @@ class TagCreationTests(PagetagsTest):
                 db.session.rollback()
                 self.fail("failed to commit transaction")
 
-            Tag.create("tag1")
+            Tag.create(db.session, "tag1")
 
             self.assertRaises(IntegrityError, db.session.commit)
 
     def test_get_or_create_new_tag(self):
         with self.app.app_context():
-            tag = Tag.get_or_create("tag1")
+            tag = Tag.get_or_create(db.session, "tag1")
 
             self.assertIsNotNone(tag)
             self.assertIsNone(tag.id)
@@ -181,11 +184,11 @@ class TagCreationTests(PagetagsTest):
 
     def test_get_or_create_existing_tag(self):
         with self.app.app_context():
-            Tag.create("tag1")
+            Tag.create(db.session, "tag1")
 
             db.session.commit()
 
-            tag = Tag.get_or_create("tag1")
+            tag = Tag.get_or_create(db.session, "tag1")
 
             self.assertIsNotNone(tag)
             self.assertIsNotNone(tag.id)
@@ -195,7 +198,7 @@ class TagCreationTests(PagetagsTest):
 class UrlCreationTests(PagetagsTest):
     def test_create_url(self):
         with self.app.app_context():
-            url = Url.create("http://www.example.com")
+            url = Url.create(db.session, "http://www.example.com")
 
             self.assertIsNotNone(url)
             self.assertIsNone(url.id)
@@ -211,7 +214,7 @@ class UrlCreationTests(PagetagsTest):
 
     def test_fail_to_create_duplicate_url(self):
         with self.app.app_context():
-            Url.create("http://www.example.com")
+            Url.create(db.session, "http://www.example.com")
 
             try:
                 db.session.commit()
@@ -219,13 +222,13 @@ class UrlCreationTests(PagetagsTest):
                 db.session.rollback()
                 self.fail("failed to commit transaction")
 
-            Url.create("http://www.example.com")
+            Url.create(db.session, "http://www.example.com")
 
             self.assertRaises(IntegrityError, db.session.commit)
 
     def test_get_or_create_new_url(self):
         with self.app.app_context():
-            url = Url.get_or_create("http://www.example.com")
+            url = Url.get_or_create(db.session, "http://www.example.com")
 
             self.assertIsNotNone(url)
             self.assertIsNone(url.id)
@@ -241,7 +244,7 @@ class UrlCreationTests(PagetagsTest):
 
     def test_get_or_create_existing_url(self):
         with self.app.app_context():
-            Url.create("http://www.example.com")
+            Url.create(db.session, "http://www.example.com")
 
             try:
                 db.session.commit()
@@ -249,7 +252,7 @@ class UrlCreationTests(PagetagsTest):
                 db.session.rollback()
                 self.fail("failed to commit transaction")
 
-            url = Url.get_or_create("http://www.example.com")
+            url = Url.get_or_create(db.session, "http://www.example.com")
 
             self.assertIsNotNone(url)
             self.assertIsNotNone(url.id)
@@ -257,19 +260,20 @@ class UrlCreationTests(PagetagsTest):
 
     def test_fail_to_create_url_with_empty_url_field(self):
         with self.app.app_context():
-            self.assertRaises(ValueError, Url.create, "")
+            self.assertRaises(ValueError, Url.create, db.session, "")
 
     def test_fail_to_create_url_with_very_large_url_field(self):
         large_url = "http://%s.com" % ("a" * Url.URL_LENGTH)
 
         with self.app.app_context():
-            self.assertRaises(ValueError, Url.create, large_url)
+            self.assertRaises(ValueError, Url.create, db.session, large_url)
 
 
 class PostCreationTests(PagetagsTest):
     def test_create_posting(self):
         with self.app.app_context():
             post = Post.create(
+                db.session,
                 "post title",
                 "http://www.example.com",
                 ["tag1", "tag2"],
@@ -300,6 +304,7 @@ class PostCreationTests(PagetagsTest):
     def test_post_name_tags(self):
         with self.app.app_context():
             post = Post.create(
+                db.session,
                 "post title",
                 "http://www.example.com",
                 ["tag1", "tag2"],
@@ -319,6 +324,7 @@ class PostCreationTests(PagetagsTest):
             self.assertRaises(
                 ValueError,
                 Post.create,
+                db.session,
                 "",
                 "http://www.google.com",
                 ["tag1", "tag2"],
@@ -332,6 +338,7 @@ class PostCreationTests(PagetagsTest):
             self.assertRaises(
                 ValueError,
                 Post.create,
+                db.session,
                 large_title,
                 "http://www.google.com",
                 ["tag1", "tag2"],
@@ -342,7 +349,7 @@ class PostCreationTests(PagetagsTest):
 class UrlPostRetrievalTests(PagetagsTestWithMockData):
     def test_retrieve_url_posts(self):
         with self.app.app_context():
-            posts = Url.get_posts("http://www.example.com/page_1")
+            posts = Url.get_posts(db.session, "http://www.example.com/page_1")
 
             self.assertEqual(len(posts), 3)
 
@@ -352,7 +359,7 @@ class UrlPostRetrievalTests(PagetagsTestWithMockData):
 
     def test_retrieve_url_posts_by_page(self):
         with self.app.app_context():
-            url = Url.get_by_url("http://www.example.com/page_1")
+            url = Url.get_by_url(db.session, "http://www.example.com/page_1")
 
             paginator = url.get_posts_by_page(1, per_page=2)
 
@@ -363,7 +370,7 @@ class UrlPostRetrievalTests(PagetagsTestWithMockData):
 
     def test_retrieve_second_page_of_url_posts(self):
         with self.app.app_context():
-            url = Url.get_by_url("http://www.example.com/page_1")
+            url = Url.get_by_url(db.session, "http://www.example.com/page_1")
 
             paginator = url.get_posts_by_page(2, per_page=2)
 
@@ -392,9 +399,9 @@ class PostPaginationTests(PagetagsTestWithMockData):
 class TagTests(PagetagsTestWithMockData):
     def test_post_count(self):
         with self.app.app_context():
-            tag = Tag.get_by_name("tag2")
+            tag = Tag.get_by_name(db.session, "tag2")
 
-            self.assertEqual(tag.post_count(), 2)
+            self.assertEqual(tag.post_count(db.session), 2)
 
     def test_get_tags_by_page(self):
         with self.app.app_context():
@@ -417,7 +424,7 @@ class TagTests(PagetagsTestWithMockData):
 class PostRetrievalTests(PagetagsTestWithMockData):
     def test_get_by_id(self):
         with self.app.app_context():
-            post = Post.get_by_id(1)
+            post = Post.get_by_id(db.session, 1)
 
             self.assertIsNotNone(post)
             self.assertEqual(post.id, 1)
@@ -428,13 +435,13 @@ class PostRetrievalTests(PagetagsTestWithMockData):
 class PostUpdateTests(PagetagsTestWithMockData):
     def test_update(self):
         with self.app.app_context():
-            post = Post.get_by_id(1)
+            post = Post.get_by_id(db.session, 1)
 
             title = "new post1 title"
             url = "http://www.example_1.com/new_post1_url"
             tags = ["tag1000", "tag2000"]
 
-            post.update(title, url, tags)
+            post.update(db.session, title, url, tags)
 
             try:
                 db.session.commit()
@@ -442,7 +449,7 @@ class PostUpdateTests(PagetagsTestWithMockData):
                 db.session.rollback()
                 self.fail("failed to update post")
 
-            post = Post.get_by_id(1)
+            post = Post.get_by_id(db.session, 1)
 
             self.assertEqual(post.id, 1)
             self.assertEqual(post.title, title)
@@ -471,7 +478,7 @@ class PostUpdateTests(PagetagsTestWithMockData):
             post = db.session.query(Post).get(1)
             category = db.session.query(Category).get(2)
 
-            PostCategory.create(post=post, category=category)
+            PostCategory.create(db.session, post=post, category=category)
 
             try:
                 db.session.commit()
@@ -487,7 +494,7 @@ class PostUpdateTests(PagetagsTestWithMockData):
 class CategoryTests(PagetagsTest):
     def test_create_category(self):
         with self.app.app_context():
-            category = Category.create("category_1")
+            category = Category.create(db.session, "category_1")
 
             self.assertIsNone(category.id)
 
@@ -501,7 +508,7 @@ class CategoryTests(PagetagsTest):
 
     def test_fail_to_create_categories_with_the_same_name(self):
         with self.app.app_context():
-            Category.create("category_1")
+            Category.create(db.session, "category_1")
 
             try:
                 db.session.commit()
@@ -509,7 +516,7 @@ class CategoryTests(PagetagsTest):
                 db.session.rollback()
                 self.fail("failed to create category object")
 
-            Category.create("category_1")
+            Category.create(db.session, "category_1")
 
             self.assertRaises(IntegrityError, db.session.commit)
 
@@ -520,7 +527,7 @@ class CategoryRetrievalTests(PagetagsTest):
 
         with self.app.app_context():
             for i in range(10):
-                Category.create("category_{}".format(i))
+                Category.create(db.session, "category_{}".format(i))
 
             try:
                 db.session.commit()
@@ -567,7 +574,11 @@ class PostCategoryTests(PagetagsTestWithMockData):
             category = db.session.query(Category).get(1)
             post = db.session.query(Post).get(1)
 
-            post_category = PostCategory.create(post=post, category=category)
+            post_category = PostCategory.create(
+                session=db.session,
+                post=post,
+                category=category
+            )
 
             db.session.add(post_category)
 

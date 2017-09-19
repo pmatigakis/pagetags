@@ -2,6 +2,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from flask import current_app, render_template, redirect, url_for, flash
 
 from pagetags import models, forms
+from pagetags.models import db
 
 
 def login():
@@ -13,7 +14,7 @@ def login():
 
         current_app.logger.info(u"authenticating user {}".format(username))
 
-        user = models.User.authenticate(username, password)
+        user = models.User.authenticate(db.session, username, password)
 
         if user:
             current_app.logger.info(u"user {} authenticated".format(username))

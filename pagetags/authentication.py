@@ -11,14 +11,14 @@ def load_user(user_id):
 
 
 def authenticate(username, password):
-    return User.authenticate(username, password)
+    return User.authenticate(db.session, username, password)
 
 
 def identity(payload):
     user_id = payload["identity"]
     jti = payload["jti"]
 
-    return User.authenticate_using_jti(user_id, jti)
+    return User.authenticate_using_jti(db.session, user_id, jti)
 
 
 def payload_handler(identity):
