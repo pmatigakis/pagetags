@@ -13,8 +13,17 @@ post_tags = db.Table(
     db.Column("post_id", db.Integer, nullable=False),
     db.Column("tag_id", db.Integer, nullable=False),
     db.ForeignKeyConstraint(
-        ["post_id"], ["posts.id"], name="fk_post_id__posts"),
-    db.ForeignKeyConstraint(["tag_id"], ["tags.id"], name="fk_tag_id__tags"),
+        ["post_id"], ["posts.id"],
+        name="fk_post_id__posts",
+        ondelete="CASCADE",
+        onupdate="CASCADE"
+    ),
+    db.ForeignKeyConstraint(
+        ["tag_id"], ["tags.id"],
+        name="fk_tag_id__tags",
+        ondelete="CASCADE",
+        onupdate="CASCADE"
+    )
 )
 
 
@@ -91,7 +100,11 @@ class Tag(db.Model):
     id = db.Column(db.Integer, nullable=False)
     name = db.Column(db.String(100), nullable=False)
 
-    posts = db.relationship('Post', secondary=post_tags, back_populates="tags")
+    posts = db.relationship(
+        'Post',
+        secondary=post_tags,
+        back_populates="tags"
+    )
 
     @classmethod
     def get_by_name(cls, session, name):
@@ -156,7 +169,11 @@ class Url(db.Model):
     url = db.Column(db.String(URL_LENGTH), nullable=False)
     added_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    posts = db.relationship("Post", back_populates="url")
+    posts = db.relationship(
+        "Post",
+        back_populates="url",
+        cascade="all, delete-orphan"
+    )
 
     @classmethod
     def create(cls, session, url):
@@ -218,8 +235,12 @@ class Post(db.Model):
 
     __table_args__ = (
         db.PrimaryKeyConstraint("id", name="pk_posts"),
-        db.ForeignKeyConstraint(["url_id"], ["urls.id"],
-                                name="fk_url_id__urls")
+        db.ForeignKeyConstraint(
+            ["url_id"], ["urls.id"],
+            name="fk_url_id__urls",
+            ondelete="CASCADE",
+            onupdate="CASCADE"
+        )
     )
 
     TITLE_LENGTH = 256
@@ -229,9 +250,21 @@ class Post(db.Model):
     title = db.Column(db.String(TITLE_LENGTH), nullable=False)
     added_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    url = db.relationship("Url", back_populates="posts")
-    tags = db.relationship('Tag', secondary=post_tags, back_populates="posts")
-    categories = db.relationship("Category", secondary="post_categories")
+    url = db.relationship(
+        "Url",
+        back_populates="posts"
+    )
+
+    tags = db.relationship(
+        'Tag',
+        secondary=post_tags,
+        back_populates="posts"
+    )
+
+    categories = db.relationship(
+        "Category",
+        secondary="post_categories"
+    )
 
     @classmethod
     def create(cls, session, title, url, tags, categories):
@@ -317,7 +350,10 @@ class Category(db.Model):
     name = db.Column(db.String(40), nullable=False)
     added_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    posts = db.relationship("Post", secondary="post_categories")
+    posts = db.relationship(
+        "Post",
+        secondary="post_categories"
+    )
 
     @classmethod
     def create(cls, session, name):
@@ -376,11 +412,15 @@ class PostCategory(db.Model):
         ),
         db.ForeignKeyConstraint(
             ["post_id"], ["posts.id"],
-            name="fk_post_categories__post_id__posts"
+            name="fk_post_categories__post_id__posts",
+            ondelete="CASCADE",
+            onupdate="CASCADE"
         ),
         db.ForeignKeyConstraint(
             ["category_id"], ["categories.id"],
-            name="fk_post_categories__category_id__categories"
+            name="fk_post_categories__category_id__categories",
+            ondelete="CASCADE",
+            onupdate="CASCADE"
         ),
     )
 
@@ -389,8 +429,15 @@ class PostCategory(db.Model):
     assigned_at = db.Column(
         db.DateTime, nullable=False, default=datetime.utcnow)
 
-    post = db.relationship("Post", backref="post_categories")
-    category = db.relationship("Category", backref="post_categories")
+    post = db.relationship(
+        "Post",
+        backref=db.backref("post_categories", cascade="all, delete-orphan")
+    )
+
+    category = db.relationship(
+        "Category",
+        backref=db.backref("post_categories", cascade="all, delete-orphan")
+    )
 
     @classmethod
     def create(cls, session, post, category):
