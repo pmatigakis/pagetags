@@ -40,6 +40,9 @@ class AuthenticatedIndexView(AdminIndexView):
 
 class TagModelView(AuthenticatedModelView):
     form_columns = ["name"]
+    can_create = False
+    can_edit = True
+    can_delete = True
 
     def __init__(self, session, *args, **kwargs):
         super(TagModelView, self).__init__(Tag, session, *args, **kwargs)
@@ -47,6 +50,9 @@ class TagModelView(AuthenticatedModelView):
 
 class UrlModelView(AuthenticatedModelView):
     form_columns = ["url"]
+    can_create = False
+    can_edit = True
+    can_delete = True
 
     def __init__(self, session, *args, **kwargs):
         super(UrlModelView, self).__init__(Url, session, *args, **kwargs)
@@ -54,6 +60,9 @@ class UrlModelView(AuthenticatedModelView):
 
 class PostModelView(AuthenticatedModelView):
     form_excluded_columns = ["post_categories", "added_at"]
+    can_create = False
+    can_edit = True
+    can_delete = True
 
     def __init__(self, session, *args, **kwargs):
         super(PostModelView, self).__init__(Post, session, *args, **kwargs)
@@ -61,6 +70,9 @@ class PostModelView(AuthenticatedModelView):
 
 class CategoryModelView(AuthenticatedModelView):
     form_columns = ["name"]
+    can_create = True
+    can_edit = True
+    can_delete = True
 
     def __init__(self, session, *args, **kwargs):
         super(CategoryModelView, self).__init__(
