@@ -45,46 +45,5 @@ class TagViewTests(PagetagsTestWithMockData):
         self.logout()
 
 
-class TagListViewTests(PagetagsTestWithMockData):
-    def test_view_tags(self):
-        self.login()
-
-        response = self.client.get("/tags")
-
-        self.assertIn("<title>PageTags - Tags</title>", response.data)
-
-        self.assertIn("tag1", response.data)
-        self.assertIn("tag2", response.data)
-        self.assertNotIn("tag3", response.data)
-        self.assertNotIn("Previous", response.data)
-        self.assertIn("Next", response.data)
-
-        self.logout()
-
-    def test_view_tags_page_2(self):
-        self.login()
-
-        response = self.client.get("/tags?page=2")
-
-        self.assertIn("<title>PageTags - Tags</title>", response.data)
-
-        self.assertNotIn("tag1", response.data)
-        self.assertNotIn("tag2", response.data)
-        self.assertIn("tag3", response.data)
-        self.assertIn("tag4", response.data)
-        self.assertNotIn("tag5", response.data)
-        self.assertIn(
-            "<a href=\"/tags?page=1\">Previous</a>",
-            response.data
-        )
-
-        self.assertIn(
-            "<a href=\"/tags?page=3\">Next</a>",
-            response.data
-        )
-
-        self.logout()
-
-
 if __name__ == "__main__":
     main()

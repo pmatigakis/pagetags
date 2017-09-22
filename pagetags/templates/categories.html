@@ -21,13 +21,13 @@
     <div class="row">
         <div class="col-md-12">
             {% if paginator.has_prev %}
-                <a href="{{ url_for('tags') }}?page={{ paginator.prev_num }}">Previous</a>
+                <a href="{{ url_for('categories') }}?page={{ paginator.prev_num }}">Previous</a>
             {% endif %}
 
             <span>Page {{ paginator.page }}</span>
 
             {% if paginator.has_next %}
-                <a href="{{ url_for('tags') }}?page={{ paginator.next_num }}">Next</a>
+                <a href="{{ url_for('categories') }}?page={{ paginator.next_num }}">Next</a>
             {% endif %}
         </div>
     </div>
